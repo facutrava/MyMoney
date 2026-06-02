@@ -261,6 +261,28 @@ textarea { resize: vertical; min-height: 56px; }
 }
 .history-footer .hf-val { color: var(--text2); font-weight: 500; }
 
+.weekly-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.weekly-stat { display: flex; flex-direction: column; gap: 2px; }
+.weekly-label { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.weekly-val { font-size: 15px; font-weight: 600; color: var(--text); }
+.weekly-sub { font-size: 11px; color: var(--text3); }
+
+.cat-progress-item { margin-bottom: 12px; }
+.cat-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.cat-progress-name { font-size: 12px; color: var(--text2); font-weight: 500; }
+.cat-progress-info { font-size: 12px; color: var(--text3); }
+.cat-progress-track { height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.cat-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+
 .freq-btn {
   font-family: 'DM Sans', sans-serif;
   font-size: 11px;
@@ -565,6 +587,8 @@ textarea { resize: vertical; min-height: 56px; }
     </div>
   </div>
 
+  <div class="weekly-card" id="weekly-summary" style="display:none;"></div>
+
   <div class="tabs">
     <button class="tab active" onclick="showTab('nuevo')">+ Nuevo</button>
     <button class="tab" onclick="showTab('historial')">Historial</button>
@@ -673,6 +697,9 @@ textarea { resize: vertical; min-height: 56px; }
       <div id="chart-trend-wrapper" style="position:relative;width:100%;height:220px;">
         <canvas id="chart-trend" role="img" aria-label="Tendencia mensual">Evolución mensual.</canvas>
       </div>
+      <div style="border-top:1px solid var(--border);margin:20px 0 16px;"></div>
+      <h3 style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:14px;">Gastos por categoría</h3>
+      <div id="cat-progress-list"></div>
     </div>
   </div>
 </main>
@@ -1195,10 +1222,62 @@ function rowHTML(e) {
   </div>`;
 }
 
+function renderCatProgress() {
+  const el = document.getElementById('cat-progress-list');
+  if (!el) return;
+  const mes    = monthEntries();
+  const gastos = mes.filter(e => (e.type||'gasto') === 'gasto');
+  const total  = gastos.reduce((s,e) => s + e.amount, 0);
+  if (!total) { el.innerHTML = '<div class="empty">Sin gastos este mes</div>'; return; }
+  const byCat = {};
+  gastos.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + e.amount; });
+  el.innerHTML = Object.entries(byCat).sort((a,b) => b[1]-a[1]).map(([cat, amount]) => {
+    const pct   = Math.round((amount / total) * 100);
+    const color = CAT_COLORS[cat] || '#8E8E93';
+    const icon  = GASTO_CATS[cat]?.icon || '📦';
+    return `<div class="cat-progress-item">
+      <div class="cat-progress-header">
+        <span class="cat-progress-name">${icon} ${cat}</span>
+        <span class="cat-progress-info">${fmt(amount)} · ${pct}%</span>
+      </div>
+      <div class="cat-progress-track"><div class="cat-progress-fill" style="width:${pct}%;background:${color};"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function updateWeeklySummary() {
+  const el = document.getElementById('weekly-summary');
+  if (!el) return;
+  const now     = new Date();
+  const diff    = now.getDay() === 0 ? 6 : now.getDay() - 1;
+  const monday  = new Date(now); monday.setDate(now.getDate() - diff); monday.setHours(0,0,0,0);
+  const mondayStr = monday.toISOString().slice(0,10);
+  const todayStr  = now.toISOString().slice(0,10);
+  const week   = entries.filter(e => e.date >= mondayStr && e.date <= todayStr);
+  const gastos = week.filter(e => (e.type||'gasto') === 'gasto');
+  const totalG = gastos.reduce((s,e) => s + e.amount, 0);
+  if (!week.length) { el.style.display = 'none'; return; }
+  const daysElapsed = diff + 1;
+  const dailyAvg    = daysElapsed > 0 ? totalG / daysElapsed : 0;
+  el.style.display  = 'flex';
+  el.innerHTML = `
+    <div class="weekly-stat">
+      <div class="weekly-label">Esta semana</div>
+      <div class="weekly-val">${fmt(totalG)} en gastos</div>
+      <div class="weekly-sub">${gastos.length} transacción${gastos.length !== 1 ? 'es' : ''} · ${daysElapsed} día${daysElapsed !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="weekly-stat">
+      <div class="weekly-label">Promedio diario</div>
+      <div class="weekly-val">${fmt(dailyAvg)}</div>
+      <div class="weekly-sub">en gastos</div>
+    </div>`;
+}
+
 function renderCharts() {
   const mes = monthEntries();
   renderCatChart(mes);
   renderTrendChart();
+  renderCatProgress();
 }
 
 function renderCatChart(mes) {
@@ -1245,33 +1324,41 @@ function renderCatChart(mes) {
 }
 
 function renderTrendChart() {
-  const type = chartType;
-  const byM  = {};
-  entries.filter(e => (e.type||'gasto') === type).forEach(e => {
+  const byM = {};
+  entries.forEach(e => {
     const k = monthKey(e.date);
-    byM[k] = (byM[k] || 0) + e.amount;
+    if (!byM[k]) byM[k] = { ingreso: 0, gasto: 0 };
+    byM[k][e.type || 'gasto'] += e.amount;
   });
-  const months = Object.keys(byM).sort().slice(-6);
-  const data   = months.map(m => Math.round(byM[m] || 0));
-  const labels = months.map(m => monthLabel(m).slice(0,3) + "'" + m.slice(2,4));
+  const months  = Object.keys(byM).sort().slice(-6);
+  const labels  = months.map(m => monthLabel(m).slice(0,3) + "'" + m.slice(2,4));
+  const ingData = months.map(m => Math.round(byM[m].ingreso || 0));
+  const gasData = months.map(m => Math.round(byM[m].gasto   || 0));
 
   if (trendChart) { trendChart.destroy(); trendChart = null; }
   const wrapper = document.getElementById('chart-trend-wrapper');
-  if (!data.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
+  if (!months.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
   if (!document.getElementById('chart-trend')) {
     wrapper.innerHTML = '<canvas id="chart-trend" role="img" aria-label="Tendencia mensual">Evolución mensual.</canvas>';
   }
-  const barColor    = type === 'ingreso' ? 'rgba(76,175,80,0.18)'  : 'rgba(201,168,76,0.18)';
-  const borderColor = type === 'ingreso' ? '#4CAF50' : '#C9A84C';
   trendChart = new Chart(document.getElementById('chart-trend'), {
-    type: 'bar',
-    data: { labels, datasets: [{ data, backgroundColor: barColor, borderColor: borderColor, borderWidth: 1.5, borderRadius: 4 }] },
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Ingresos', data: ingData, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.08)',  tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#4CAF50', borderWidth: 2 },
+        { label: 'Gastos',   data: gasData, borderColor: '#EF5350', backgroundColor: 'rgba(239,83,80,0.08)', tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#EF5350', borderWidth: 2 }
+      ]
+    },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: true, labels: { font: { size: 11, family: 'DM Sans' }, color: '#9B9B9B', boxWidth: 10, usePointStyle: true } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}` } }
+      },
       scales: {
-        x: { ticks: { font: {size:11,family:'DM Sans'}, color: '#6B6B6B' }, grid: { display: false }, border: { display: false } },
-        y: { ticks: { font: {size:11,family:'DM Sans'}, color: '#6B6B6B', callback: v => '$' + v.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } }
+        x: { ticks: { font:{size:11,family:'DM Sans'}, color:'#6B6B6B' }, grid:{ display:false }, border:{ display:false } },
+        y: { ticks: { font:{size:11,family:'DM Sans'}, color:'#6B6B6B', callback: v => '$' + v.toLocaleString() }, grid:{ color:'rgba(255,255,255,0.04)' }, border:{ display:false } }
       }
     }
   });
@@ -1386,6 +1473,7 @@ function updateAll() {
   renderHistory();
   updateDescSuggestions();
   renderFreqAmounts();
+  updateWeeklySummary();
   if (document.getElementById('tab-graficos').classList.contains('active')) renderCharts();
 }
 

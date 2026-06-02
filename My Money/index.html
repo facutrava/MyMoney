@@ -738,12 +738,19 @@ textarea { resize: vertical; min-height: 56px; }
       </div>
       <div class="legend" id="cat-legend"></div>
       <div style="border-top:1px solid var(--border);margin:20px 0 16px;"></div>
-      <h3 style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:12px;">Tendencia mensual</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h3 style="font-size:14px;font-weight:600;color:var(--text2);margin:0;">Tendencia</h3>
+        <div class="view-toggle">
+          <button class="vtbtn active" id="tp-mensual" onclick="setTrendPeriod('mensual')">Mensual</button>
+          <button class="vtbtn"        id="tp-semanal" onclick="setTrendPeriod('semanal')">Semanal</button>
+          <button class="vtbtn"        id="tp-diaria"  onclick="setTrendPeriod('diaria')">Diaria</button>
+        </div>
+      </div>
       <div id="chart-trend-wrapper" style="position:relative;width:100%;height:220px;">
         <canvas id="chart-trend" role="img" aria-label="Tendencia mensual">Evolución mensual.</canvas>
       </div>
       <div style="border-top:1px solid var(--border);margin:20px 0 16px;"></div>
-      <h3 style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:14px;">Gastos por categoría</h3>
+      <h3 id="cat-progress-title" style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:14px;">Gastos por categoría</h3>
       <div id="cat-progress-list"></div>
     </div>
   </div>
@@ -779,7 +786,7 @@ textarea { resize: vertical; min-height: 56px; }
 <script>
 const GASTO_CATS = {
   'Comida':          { icon: '🍔', subs: ['Supermercado','Kiosco','Restaurante','Delivery','Otros'] },
-  'Transporte':      { icon: '🚗', subs: ['Didi','Uber','Nafta','Seguro','Mantenimiento','Repuestos','Lavado','Otros'] },
+  'Transporte':      { icon: '🚗', subs: ['Didi','Uber','Nafta','Seguro','Mantenimiento','Repuestos','Lavado','Estacionamiento','Otros'] },
   'Salud':           { icon: '💊', subs: ['Turnos médicos','Farmacia','Obra social','Otros'] },
   'Entretenimiento': { icon: '🎬', subs: ['Servicio de Streaming','Ocio','Videojuegos'] },
   'Deporte':         { icon: '⚽', subs: ['Padel','Futbol','Tenis','Natacion','Otros'] },
@@ -787,7 +794,7 @@ const GASTO_CATS = {
   'Mascotas':        { icon: '🐾', subs: ['Alimento','Veterinaria','Otros'] },
   'Educación':       { icon: '📚', subs: ['Facultad','Cursos','Otros'] },
   'Deudas':          { icon: '💳', subs: ['Tarjeta de crédito','Prestamos','Deudas a terceros'] },
-  'Otros':           { icon: '📦', subs: ['Ropa y accesorios','Calzado','E-commerce'] }
+  'Otros':           { icon: '📦', subs: ['Ropa y accesorios','Calzado','E-commerce','Regalos'] }
 };
 
 const INGRESO_CATS = {
@@ -991,6 +998,7 @@ let currentType = 'gasto';
 let view = 'day';
 let catChart = null, trendChart = null;
 let chartType = 'gasto';
+let trendPeriod = 'mensual';
 let budgets = {};
 let goals   = [];
 
@@ -998,6 +1006,8 @@ function setChartType(t) {
   chartType = t;
   document.getElementById('gc-gasto').classList.toggle('active', t === 'gasto');
   document.getElementById('gc-ingreso').classList.toggle('active', t === 'ingreso');
+  const titleEl = document.getElementById('cat-progress-title');
+  if (titleEl) titleEl.textContent = t === 'gasto' ? 'Gastos por categoría' : 'Ingresos por categoría';
   renderCharts();
 }
 
@@ -1307,7 +1317,29 @@ function rowHTML(e) {
 function renderCatProgress() {
   const el = document.getElementById('cat-progress-list');
   if (!el) return;
-  const mes    = monthEntries();
+  const mes = monthEntries();
+
+  if (chartType === 'ingreso') {
+    const ingresos = mes.filter(e => e.type === 'ingreso');
+    const total    = ingresos.reduce((s,e) => s + e.amount, 0);
+    if (!total) { el.innerHTML = '<div class="empty">Sin ingresos este mes</div>'; return; }
+    const byCat = {};
+    ingresos.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + e.amount; });
+    el.innerHTML = Object.entries(byCat).sort((a,b) => b[1]-a[1]).map(([cat, amount]) => {
+      const color = CAT_COLORS[cat] || '#8E8E93';
+      const icon  = INGRESO_CATS[cat]?.icon || '📈';
+      const pct   = Math.round((amount / total) * 100);
+      return `<div class="cat-progress-item">
+        <div class="cat-progress-header">
+          <span class="cat-progress-name">${icon} ${cat}</span>
+          <span class="cat-progress-info">${fmt(amount)} · ${pct}%</span>
+        </div>
+        <div class="cat-progress-track"><div class="cat-progress-fill" style="width:${pct}%;background:${color};"></div></div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
   const gastos = mes.filter(e => (e.type||'gasto') === 'gasto');
   const total  = gastos.reduce((s,e) => s + e.amount, 0);
   if (!total) { el.innerHTML = '<div class="empty">Sin gastos este mes</div>'; return; }
@@ -1549,23 +1581,71 @@ function renderCatChart(mes) {
   ).join('');
 }
 
-function renderTrendChart() {
-  const byM = {};
-  entries.forEach(e => {
-    const k = monthKey(e.date);
-    if (!byM[k]) byM[k] = { ingreso: 0, gasto: 0 };
-    byM[k][e.type || 'gasto'] += e.amount;
+function setTrendPeriod(p) {
+  trendPeriod = p;
+  ['mensual','semanal','diaria'].forEach(t => {
+    document.getElementById('tp-' + t)?.classList.toggle('active', t === p);
   });
-  const months  = Object.keys(byM).sort().slice(-6);
-  const labels  = months.map(m => monthLabel(m).slice(0,3) + "'" + m.slice(2,4));
-  const ingData = months.map(m => Math.round(byM[m].ingreso || 0));
-  const gasData = months.map(m => Math.round(byM[m].gasto   || 0));
+  renderTrendChart();
+}
 
+function renderTrendChart() {
   if (trendChart) { trendChart.destroy(); trendChart = null; }
   const wrapper = document.getElementById('chart-trend-wrapper');
-  if (!months.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
+  let labels, ingData, gasData;
+
+  if (trendPeriod === 'mensual') {
+    const byM = {};
+    entries.forEach(e => {
+      const k = monthKey(e.date);
+      if (!byM[k]) byM[k] = { ingreso: 0, gasto: 0 };
+      byM[k][e.type || 'gasto'] += e.amount;
+    });
+    const months = Object.keys(byM).sort().slice(-6);
+    if (!months.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
+    labels  = months.map(m => monthLabel(m).slice(0,3) + "'" + m.slice(2,4));
+    ingData = months.map(m => Math.round(byM[m].ingreso || 0));
+    gasData = months.map(m => Math.round(byM[m].gasto   || 0));
+
+  } else if (trendPeriod === 'semanal') {
+    function getWeekStart(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      const day = d.getDay() === 0 ? 6 : d.getDay() - 1;
+      const mon = new Date(d);
+      mon.setDate(d.getDate() - day);
+      return mon.toISOString().slice(0, 10);
+    }
+    const byW = {};
+    entries.forEach(e => {
+      const k = getWeekStart(e.date);
+      if (!byW[k]) byW[k] = { ingreso: 0, gasto: 0 };
+      byW[k][e.type || 'gasto'] += e.amount;
+    });
+    const weeks = Object.keys(byW).sort().slice(-8);
+    if (!weeks.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
+    labels  = weeks.map(w => new Date(w + 'T12:00:00').toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' }));
+    ingData = weeks.map(w => Math.round(byW[w].ingreso || 0));
+    gasData = weeks.map(w => Math.round(byW[w].gasto   || 0));
+
+  } else {
+    const today = todayAR();
+    const from  = new Date(today + 'T12:00:00');
+    from.setDate(from.getDate() - 29);
+    const startDate = from.toISOString().slice(0, 10);
+    const byD = {};
+    entries.filter(e => e.date >= startDate).forEach(e => {
+      if (!byD[e.date]) byD[e.date] = { ingreso: 0, gasto: 0 };
+      byD[e.date][e.type || 'gasto'] += e.amount;
+    });
+    const days = Object.keys(byD).sort();
+    if (!days.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos en los últimos 30 días</div>'; return; }
+    labels  = days.map(d => new Date(d + 'T12:00:00').toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' }));
+    ingData = days.map(d => Math.round(byD[d].ingreso || 0));
+    gasData = days.map(d => Math.round(byD[d].gasto   || 0));
+  }
+
   if (!document.getElementById('chart-trend')) {
-    wrapper.innerHTML = '<canvas id="chart-trend" role="img" aria-label="Tendencia mensual">Evolución mensual.</canvas>';
+    wrapper.innerHTML = '<canvas id="chart-trend" role="img" aria-label="Tendencia">Tendencia.</canvas>';
   }
   trendChart = new Chart(document.getElementById('chart-trend'), {
     type: 'line',

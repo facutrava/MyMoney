@@ -458,6 +458,11 @@ textarea { resize: vertical; min-height: 56px; }
     <div class="auth-logo"><span style="color:var(--text)">My</span><span style="color:var(--accent)">Money</span></div>
     <p id="auth-subtitle" class="auth-subtitle">Iniciá sesión en tu cuenta</p>
     <div id="auth-error" class="auth-error" style="display:none;"></div>
+    <div id="auth-extra-fields" style="display:none;width:100%;">
+      <input type="text" id="auth-nombre"   class="auth-input" placeholder="Nombre" />
+      <input type="text" id="auth-apellido" class="auth-input" placeholder="Apellido" />
+      <input type="tel"  id="auth-telefono" class="auth-input" placeholder="Teléfono (opcional)" />
+    </div>
     <input type="email"    id="auth-email"    class="auth-input" placeholder="Email" />
     <input type="password" id="auth-password" class="auth-input" placeholder="Contraseña" />
     <button id="auth-submit-btn" class="auth-btn-primary" onclick="authSubmit()">Iniciar sesión</button>
@@ -475,6 +480,20 @@ textarea { resize: vertical; min-height: 56px; }
   </div>
 </div>
 
+<div id="profile-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:16px;padding:24px;width:320px;max-width:90vw;display:flex;flex-direction:column;gap:10px;border:1px solid var(--border2);box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <h3 style="margin:0;color:var(--text);font-size:16px;">Mi perfil</h3>
+    <input type="text"  id="profile-nombre"   class="auth-input" placeholder="Nombre" />
+    <input type="text"  id="profile-apellido" class="auth-input" placeholder="Apellido" />
+    <input type="tel"   id="profile-telefono" class="auth-input" placeholder="Teléfono" />
+    <input type="email" id="profile-email"    class="auth-input" placeholder="Email" disabled style="opacity:0.5;cursor:not-allowed;" />
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn btn-ghost" onclick="closeProfileModal()" style="flex:1;">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProfile()" style="flex:1;">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <header class="app-header">
   <div class="header-inner">
     <h1 class="app-title"><span class="title-my">My</span> <span class="title-money">Money</span></h1>
@@ -482,7 +501,7 @@ textarea { resize: vertical; min-height: 56px; }
       <select class="month-select" id="year-filter" onchange="updateMonthFilter()"></select>
       <select class="month-select" id="month-filter" onchange="updateAll()"></select>
       <div id="user-info">
-        <span id="user-email"></span>
+        <span id="user-email" onclick="openProfileModal()" style="cursor:pointer;text-decoration:underline dotted;" title="Ver perfil"></span>
         <button class="btn-signout" onclick="signOut()">Salir</button>
       </div>
     </div>
@@ -579,8 +598,11 @@ textarea { resize: vertical; min-height: 56px; }
         <option value="gasto">Gastos</option>
         <option value="ingreso">Ingresos</option>
       </select>
-      <select id="hf-cat" onchange="renderHistory()" style="font-size:13px;">
+      <select id="hf-cat" onchange="onCatFilterChange()" style="font-size:13px;">
         <option value="all">Todas las categorías</option>
+      </select>
+      <select id="hf-subcat" onchange="renderHistory()" style="font-size:13px;display:none;">
+        <option value="all">Todas las subcategorías</option>
       </select>
       <input type="text" id="hf-search" placeholder="Buscar..." oninput="renderHistory()" style="font-size:13px;width:130px;" />
       <button class="btn btn-ghost" onclick="exportCSV()" style="font-size:13px;padding:6px 12px;border:1px solid var(--border2);color:var(--text2);">↓ CSV</button>
@@ -703,6 +725,7 @@ let authMode = 'login';
 function toggleAuthMode() {
   authMode = authMode === 'login' ? 'signup' : 'login';
   const isLogin = authMode === 'login';
+  document.getElementById('auth-extra-fields').style.display = isLogin ? 'none' : 'block';
   document.getElementById('auth-subtitle').textContent     = isLogin ? 'Iniciá sesión en tu cuenta' : 'Creá tu cuenta';
   document.getElementById('auth-submit-btn').textContent   = isLogin ? 'Iniciar sesión' : 'Crear cuenta';
   document.getElementById('auth-toggle-text').innerHTML    = isLogin
@@ -720,12 +743,18 @@ async function authSubmit() {
   if (!email || !password) { showAuthError('Completá email y contraseña'); return; }
   const btn = document.getElementById('auth-submit-btn');
   btn.disabled = true;
-  const fn = authMode === 'login'
-    ? sb.auth.signInWithPassword({ email, password })
-    : sb.auth.signUp({ email, password });
-  const { error } = await fn;
+  let result;
+  if (authMode === 'signup') {
+    const nombre   = document.getElementById('auth-nombre').value.trim();
+    const apellido = document.getElementById('auth-apellido').value.trim();
+    const telefono = document.getElementById('auth-telefono').value.trim();
+    if (!nombre || !apellido) { showAuthError('Completá nombre y apellido'); btn.disabled = false; return; }
+    result = await sb.auth.signUp({ email, password, options: { data: { nombre, apellido, telefono } } });
+  } else {
+    result = await sb.auth.signInWithPassword({ email, password });
+  }
   btn.disabled = false;
-  if (error) { showAuthError(error.message); return; }
+  if (result.error) { showAuthError(result.error.message); return; }
   if (authMode === 'signup') showToast('Cuenta creada. Revisá tu email para confirmar.', 'success');
   document.getElementById('auth-error').style.display = 'none';
 }
@@ -739,6 +768,45 @@ async function signOut() {
 
 let entries = [];
 let currentUser = null;
+let currentProfile = null;
+
+async function loadProfile(user) {
+  try {
+    const data = await dbFetch('GET', `profiles?id=eq.${user.id}&select=*`);
+    if (data && data.length > 0) {
+      currentProfile = data[0];
+    } else {
+      const meta = user.user_metadata || {};
+      const profile = { id: user.id, nombre: meta.nombre || '', apellido: meta.apellido || '', telefono: meta.telefono || '' };
+      await dbFetch('POST', 'profiles', profile);
+      currentProfile = profile;
+    }
+  } catch(e) { currentProfile = { nombre: '', apellido: '', telefono: '' }; }
+}
+
+function openProfileModal() {
+  document.getElementById('profile-nombre').value   = currentProfile?.nombre   || '';
+  document.getElementById('profile-apellido').value = currentProfile?.apellido || '';
+  document.getElementById('profile-telefono').value = currentProfile?.telefono || '';
+  document.getElementById('profile-email').value    = currentUser?.email || '';
+  document.getElementById('profile-modal').style.display = 'flex';
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').style.display = 'none';
+}
+
+async function saveProfile() {
+  const nombre   = document.getElementById('profile-nombre').value.trim();
+  const apellido = document.getElementById('profile-apellido').value.trim();
+  const telefono = document.getElementById('profile-telefono').value.trim();
+  try {
+    await dbFetch('PATCH', `profiles?id=eq.${currentUser.id}`, { nombre, apellido, telefono, updated_at: new Date().toISOString() });
+    currentProfile = { ...currentProfile, nombre, apellido, telefono };
+    closeProfileModal();
+    showToast('Perfil actualizado', 'success');
+  } catch(e) { showToast('Error al guardar perfil', 'error'); }
+}
 let currentType = 'gasto';
 let view = 'day';
 let catChart = null, trendChart = null;
@@ -882,16 +950,39 @@ function onTypeFilterChange() {
     opts += '<optgroup label="Ingresos">' + Object.keys(INGRESO_CATS).map(c => `<option value="${c}">${INGRESO_CATS[c].icon} ${c}</option>`).join('') + '</optgroup>';
   }
   catSel.innerHTML = opts;
+  const subcatSel = document.getElementById('hf-subcat');
+  subcatSel.style.display = 'none';
+  subcatSel.innerHTML = '<option value="all">Todas las subcategorías</option>';
+  renderHistory();
+}
+
+function onCatFilterChange() {
+  const type    = document.getElementById('hf-type').value;
+  const cat     = document.getElementById('hf-cat').value;
+  const subcatSel = document.getElementById('hf-subcat');
+  const cats    = type === 'ingreso' ? INGRESO_CATS : GASTO_CATS;
+  const subs    = cats[cat]?.subs || [];
+  if (cat !== 'all' && subs.length) {
+    subcatSel.innerHTML = '<option value="all">Todas las subcategorías</option>' +
+      subs.map(s => `<option value="${s}">${s}</option>`).join('');
+    subcatSel.style.display = '';
+  } else {
+    subcatSel.innerHTML = '<option value="all">Todas las subcategorías</option>';
+    subcatSel.style.display = 'none';
+  }
   renderHistory();
 }
 
 function renderHistory() {
   const mes  = monthEntries();
-  const tf   = document.getElementById('hf-type').value;
-  const catf = document.getElementById('hf-cat').value;
+  const tf      = document.getElementById('hf-type').value;
+  const catf    = document.getElementById('hf-cat').value;
+  const subcatf = document.getElementById('hf-subcat').value;
   let list = mes.filter(e => {
     const t = e.type || 'gasto';
-    return (tf === 'all' || t === tf) && (catf === 'all' || e.category === catf);
+    return (tf === 'all' || t === tf) &&
+           (catf === 'all' || e.category === catf) &&
+           (subcatf === 'all' || e.subcategory === subcatf);
   });
   const search = (document.getElementById('hf-search')?.value || '').toLowerCase().trim();
   if (search) list = list.filter(e => (e.desc||'').toLowerCase().includes(search) || (e.note||'').toLowerCase().includes(search));
@@ -1140,6 +1231,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     currentUser = session.user;
     accessToken = session.access_token;
     showApp(session.user);
+    await loadProfile(session.user);
     await loadEntries();
   } else {
     currentUser = null;

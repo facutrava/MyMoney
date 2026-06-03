@@ -1036,7 +1036,7 @@ function selectedMonth() { return document.getElementById('month-filter').value;
 function monthEntries()  { return entries.filter(e => monthKey(e.date) === selectedMonth()); }
 
 function fmt(n) {
-  return '$' + Math.round(Math.abs(n)).toLocaleString('es-AR');
+  return '$' + Math.abs(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function initMonthFilter() {

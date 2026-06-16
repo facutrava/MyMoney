@@ -1729,7 +1729,7 @@ async function addEntry() {
   const category      = document.getElementById('f-category').value;
   const subcategory   = document.getElementById('f-subcategory').value;
   const date          = document.getElementById('f-date').value;
-  const note          = document.getElementById('f-note').value.trim();
+  const note          = document.getElementById('f-note')?.value?.trim() ?? '';
   if (!desc || !amount || !date || amount <= 0) { showToast('Completá descripción, monto y fecha', 'error'); return; }
   const uid = currentUser.id;
   const btn = document.getElementById('submit-btn');
@@ -1755,7 +1755,8 @@ async function addEntry() {
   btn.style.boxShadow = '0 2px 8px rgba(76,175,80,0.25)';
   document.getElementById('f-desc').value   = '';
   document.getElementById('f-amount').value = '';
-  document.getElementById('f-note').value   = '';
+  const noteEl = document.getElementById('f-note');
+  if (noteEl) noteEl.value = '';
   initMonthFilter();
   updateAll();
   setTimeout(() => {
@@ -1787,7 +1788,8 @@ function editEntry(id) {
   updateSubcats();
   document.getElementById('f-subcategory').value = e.subcategory || '';
   document.getElementById('f-date').value        = e.date;
-  document.getElementById('f-note').value        = e.note || '';
+  const editNoteEl = document.getElementById('f-note');
+  if (editNoteEl) editNoteEl.value = e.note || '';
   document.getElementById('submit-btn').textContent = 'Guardar cambios';
   showTab('nuevo');
 }

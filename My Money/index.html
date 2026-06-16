@@ -713,6 +713,15 @@ textarea { resize: vertical; min-height: 56px; }
       <select id="hf-subcat" onchange="renderHistory()" style="font-size:13px;display:none;">
         <option value="all">Todas las subcategorías</option>
       </select>
+      <select id="hf-payment" onchange="renderHistory()" style="font-size:13px;">
+        <option value="all">Todas las formas de pago</option>
+        <option value="Efectivo">Efectivo</option>
+        <option value="Débito">Débito</option>
+        <option value="Crédito">Crédito</option>
+        <option value="Transferencia">Transferencia</option>
+        <option value="Mercado Pago">Mercado Pago</option>
+        <option value="USD">USD</option>
+      </select>
       <input type="text" id="hf-search" placeholder="Buscar..." oninput="renderHistory()" style="font-size:13px;width:130px;" />
       <div style="display:flex;align-items:center;gap:4px;">
         <span style="font-size:11px;color:var(--text3);white-space:nowrap;">Del</span>
@@ -1254,11 +1263,13 @@ function renderHistory() {
   const tf      = document.getElementById('hf-type').value;
   const catf    = document.getElementById('hf-cat').value;
   const subcatf = document.getElementById('hf-subcat').value;
+  const payf    = document.getElementById('hf-payment')?.value || 'all';
   let list = mes.filter(e => {
     const t = e.type || 'gasto';
     return (tf === 'all' || t === tf) &&
            (catf === 'all' || e.category === catf) &&
-           (subcatf === 'all' || e.subcategory === subcatf);
+           (subcatf === 'all' || e.subcategory === subcatf) &&
+           (payf === 'all' || (e.paymentMethod || '') === payf);
   });
   const search = (document.getElementById('hf-search')?.value || '').toLowerCase().trim();
   if (search) list = list.filter(e => (e.desc||'').toLowerCase().includes(search) || (e.note||'').toLowerCase().includes(search));

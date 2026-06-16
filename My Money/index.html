@@ -95,7 +95,7 @@ body {
 .main { max-width: 800px; margin: 0 auto; padding: 16px; }
 
 /* Metrics */
-.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
 
 .metric-card {
   background: var(--surface);
@@ -122,6 +122,7 @@ body {
 .metric-val.expense { color: var(--red); }
 .metric-val.ok      { color: var(--accent); }
 .metric-val.over    { color: var(--red); }
+.metric-val.credit  { color: #5AC8FA; }
 
 .metric-delta { font-size: 11px; margin-top: 5px; font-weight: 500; min-height: 14px; }
 .metric-delta.up   { color: var(--green); }
@@ -441,14 +442,13 @@ textarea { resize: vertical; min-height: 56px; }
 @keyframes fadeInTab { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* Spending bar */
-.spending-bar-wrap  { grid-column: span 3; margin-top: 4px; }
+.spending-bar-wrap  { grid-column: span 4; margin-top: 4px; }
 .spending-bar-label { font-size: 11px; color: var(--text3); display: flex; justify-content: space-between; margin-bottom: 5px; }
 .spending-bar-track { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
 .spending-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.4s ease, background 0.3s ease; }
 
 @media (max-width: 600px) {
   .metrics { grid-template-columns: 1fr 1fr; }
-  .metrics .metric-card:last-child { grid-column: span 2; }
   .spending-bar-wrap { grid-column: span 2; }
   .form-grid { grid-template-columns: 1fr; }
   .metric-val { font-size: 18px; }
@@ -625,6 +625,11 @@ textarea { resize: vertical; min-height: 56px; }
       <div class="metric-val" id="m-balance">$0</div>
       <div class="metric-delta" id="m-balance-delta"></div>
     </div>
+    <div class="metric-card">
+      <div class="metric-label">A plazo 💳</div>
+      <div class="metric-val credit" id="m-plazo">$0</div>
+      <div class="metric-delta" id="m-plazo-delta"></div>
+    </div>
     <div class="spending-bar-wrap" id="spending-bar-wrap" style="display:none;">
       <div class="spending-bar-label"><span id="spending-bar-text">Presupuesto consumido</span><span id="spending-pct">0%</span></div>
       <div class="spending-bar-track"><div class="spending-bar-fill" id="spending-bar-fill"></div></div>
@@ -713,6 +718,13 @@ textarea { resize: vertical; min-height: 56px; }
         <option value="all">Todas las subcategorías</option>
       </select>
       <input type="text" id="hf-search" placeholder="Buscar..." oninput="renderHistory()" style="font-size:13px;width:130px;" />
+      <div style="display:flex;align-items:center;gap:4px;">
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">Del</span>
+        <input type="date" id="hf-date-from" onchange="onDateFilterChange()" style="font-size:12px;padding:5px 8px;width:128px;" />
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">al</span>
+        <input type="date" id="hf-date-to" onchange="onDateFilterChange()" style="font-size:12px;padding:5px 8px;width:128px;" />
+        <button class="btn btn-ghost" onclick="clearDateFilter()" id="clear-date-btn" style="display:none;font-size:13px;padding:5px 9px;border:1px solid var(--border2);" title="Limpiar rango">✕</button>
+      </div>
       <button class="btn btn-ghost" onclick="exportCSV()" style="font-size:13px;padding:6px 12px;border:1px solid var(--border2);color:var(--text2);">↓ CSV</button>
       <div class="view-toggle">
         <button class="vtbtn active" id="vb-day"   onclick="setView('day')">Día</button>
@@ -1090,27 +1102,32 @@ function setDelta(id, cur, pre, invertColors) {
 
 function updateMetrics() {
   const mes = monthEntries();
-  const totalIngresos = mes.filter(e => (e.type||'gasto') === 'ingreso').reduce((s,e) => s + e.amount, 0);
-  const totalGastos   = mes.filter(e => (e.type||'gasto') === 'gasto').reduce((s,e) => s + e.amount, 0);
-  const balance = totalIngresos - totalGastos;
+  const totalIngresos   = mes.filter(e => (e.type||'gasto') === 'ingreso').reduce((s,e) => s + e.amount, 0);
+  const gastosAll       = mes.filter(e => (e.type||'gasto') === 'gasto');
+  const totalGastos     = gastosAll.reduce((s,e) => s + e.amount, 0);
+  const totalGastoPlazo = gastosAll.filter(e => e.paymentMethod === 'Crédito').reduce((s,e) => s + e.amount, 0);
+  const balance         = totalIngresos - (totalGastos - totalGastoPlazo);
 
   const balEl = document.getElementById('m-balance');
   balEl.className = 'metric-val ' + (balance >= 0 ? 'ok' : 'over');
 
-  animateNumber(document.getElementById('m-ingresos'), totalIngresos, v => fmt(v));
-  animateNumber(document.getElementById('m-gastos'),   totalGastos,   v => fmt(v));
+  animateNumber(document.getElementById('m-ingresos'), totalIngresos,    v => fmt(v));
+  animateNumber(document.getElementById('m-gastos'),   totalGastos,      v => fmt(v));
+  animateNumber(document.getElementById('m-plazo'),    totalGastoPlazo,  v => fmt(v));
   animateNumber(balEl, Math.abs(balance), v => (balance >= 0 ? '+' : '-') + fmt(v));
 
   // Tendencia vs mes anterior
-  const prevKey  = prevMonthKey(selectedMonth());
-  const prev     = entries.filter(e => monthKey(e.date) === prevKey);
-  const prevIng  = prev.filter(e => (e.type||'gasto') === 'ingreso').reduce((s,e) => s + e.amount, 0);
-  const prevGast = prev.filter(e => (e.type||'gasto') === 'gasto').reduce((s,e)   => s + e.amount, 0);
-  const prevBal  = prevIng - prevGast;
+  const prevKey       = prevMonthKey(selectedMonth());
+  const prev          = entries.filter(e => monthKey(e.date) === prevKey);
+  const prevIng       = prev.filter(e => (e.type||'gasto') === 'ingreso').reduce((s,e) => s + e.amount, 0);
+  const prevGast      = prev.filter(e => (e.type||'gasto') === 'gasto').reduce((s,e) => s + e.amount, 0);
+  const prevPlazo     = prev.filter(e => (e.type||'gasto') === 'gasto' && e.paymentMethod === 'Crédito').reduce((s,e) => s + e.amount, 0);
+  const prevBal       = prevIng - (prevGast - prevPlazo);
 
-  setDelta('m-ingresos-delta', totalIngresos, prevIng,  false);
-  setDelta('m-gastos-delta',   totalGastos,   prevGast, true);
-  setDelta('m-balance-delta',  balance,        prevBal,  false);
+  setDelta('m-ingresos-delta', totalIngresos,   prevIng,    false);
+  setDelta('m-gastos-delta',   totalGastos,     prevGast,   true);
+  setDelta('m-plazo-delta',    totalGastoPlazo, prevPlazo,  true);
+  setDelta('m-balance-delta',  balance,         prevBal,    false);
 
   // Barra de presupuesto consumido
   const barWrap    = document.getElementById('spending-bar-wrap');
@@ -1219,7 +1236,15 @@ function onCatFilterChange() {
 }
 
 function renderHistory() {
-  const mes  = monthEntries();
+  const dateFrom = document.getElementById('hf-date-from')?.value;
+  const dateTo   = document.getElementById('hf-date-to')?.value;
+  const mes = (dateFrom || dateTo)
+    ? entries.filter(e => {
+        if (dateFrom && e.date < dateFrom) return false;
+        if (dateTo   && e.date > dateTo)   return false;
+        return true;
+      })
+    : monthEntries();
   const tf      = document.getElementById('hf-type').value;
   const catf    = document.getElementById('hf-cat').value;
   const subcatf = document.getElementById('hf-subcat').value;
@@ -1471,6 +1496,24 @@ function renderGoals() {
   }).join('');
 }
 
+function onDateFilterChange() {
+  const from = document.getElementById('hf-date-from')?.value;
+  const to   = document.getElementById('hf-date-to')?.value;
+  const clearBtn = document.getElementById('clear-date-btn');
+  if (clearBtn) clearBtn.style.display = (from || to) ? '' : 'none';
+  renderHistory();
+}
+
+function clearDateFilter() {
+  const fromEl = document.getElementById('hf-date-from');
+  const toEl   = document.getElementById('hf-date-to');
+  if (fromEl) fromEl.value = '';
+  if (toEl)   toEl.value   = '';
+  const clearBtn = document.getElementById('clear-date-btn');
+  if (clearBtn) clearBtn.style.display = 'none';
+  renderHistory();
+}
+
 function updateWeeklySummary() {
   const el = document.getElementById('weekly-summary');
   if (!el) return;
@@ -1567,14 +1610,15 @@ function renderTrendChart() {
   if (!document.getElementById('chart-trend')) {
     wrapper.innerHTML = '<canvas id="chart-trend" role="img" aria-label="Tendencia mensual">Evolución mensual.</canvas>';
   }
+  const trendDatasets = [];
+  if (chartType !== 'ingreso') trendDatasets.push({ label: 'Gastos',   data: gasData, borderColor: '#EF5350', backgroundColor: 'rgba(239,83,80,0.08)', tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#EF5350', borderWidth: 2 });
+  if (chartType !== 'gasto')   trendDatasets.push({ label: 'Ingresos', data: ingData, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.08)',  tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#4CAF50', borderWidth: 2 });
+
   trendChart = new Chart(document.getElementById('chart-trend'), {
     type: 'line',
     data: {
       labels,
-      datasets: [
-        { label: 'Ingresos', data: ingData, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.08)',  tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#4CAF50', borderWidth: 2 },
-        { label: 'Gastos',   data: gasData, borderColor: '#EF5350', backgroundColor: 'rgba(239,83,80,0.08)', tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#EF5350', borderWidth: 2 }
-      ]
+      datasets: trendDatasets
     },
     options: {
       responsive: true, maintainAspectRatio: false,

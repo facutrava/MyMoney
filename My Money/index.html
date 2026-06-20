@@ -48,6 +48,7 @@
   --shadow: 0 2px 8px rgba(0,0,0,0.40);
 }
 
+html { overflow-x: hidden; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
@@ -55,6 +56,8 @@ body {
   min-height: 100vh;
   font-size: 16px;
   line-height: 1.5;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 .app-header {
@@ -73,6 +76,8 @@ body {
   align-items: center;
   justify-content: space-between;
   height: 56px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .app-title {
@@ -105,7 +110,7 @@ body {
 }
 .month-select:focus { border-color: var(--accent); }
 
-.main { max-width: 800px; margin: 0 auto; padding: 16px; }
+.main { max-width: 800px; margin: 0 auto; padding: 16px; width: 100%; }
 
 /* Metrics */
 .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
@@ -743,20 +748,44 @@ textarea { resize: vertical; min-height: 56px; }
 .cal-cell.today .cal-day-num { color: var(--accent); }
 
 @media (max-width: 600px) {
+  /* Layout base */
   .metrics { grid-template-columns: 1fr 1fr; }
   .spending-bar-wrap { grid-column: span 2; }
   .form-grid { grid-template-columns: 1fr; }
   .metric-val { font-size: 18px; }
   .tabs { display: none; }
   .bottom-nav { display: flex; }
-  .main { padding-bottom: 72px; }
+  .main { padding-bottom: 72px; padding-left: 12px; padding-right: 12px; }
+
+  /* Header compacto */
+  .app-header { padding: 0 12px; }
+  .header-inner { height: 50px; gap: 6px; }
+  .app-title { font-size: 17px; }
+  #user-display-name { display: none; }
+  .btn-signout { font-size: 11px; padding: 3px 7px; }
+  .month-select { font-size: 12px; padding: 4px 22px 4px 7px; }
+  .streak-badge { font-size: 11px !important; padding: 2px 7px !important; }
+
+  /* Métricas secundarias: 2 columnas en mobile */
+  .metrics-secondary { grid-template-columns: 1fr 1fr; }
+  .metric-sec { padding: 10px; }
+  .metric-sec-val { font-size: 13px; }
+  .metric-sec-label { font-size: 9px; }
+  .balance-hero-amount { font-size: 32px; }
+  .balance-hero { padding: 16px 14px 12px; }
+
   /* Evitar zoom automático de iOS al hacer foco en inputs */
   input, select, textarea { font-size: 16px !important; }
   .filter-row select { font-size: 14px !important; }
-  /* Mejor legibilidad del historial en pantallas chicas */
+
+  /* Historial */
   .exp-name { font-size: 13px; }
   .exp-sub  { font-size: 11px; }
   .exp-amount { font-size: 14px; }
+
+  /* Filtros más compactos */
+  .filter-bar { gap: 6px; }
+  .filter-row { gap: 5px; flex-wrap: wrap; }
 }
 
 #splash {
@@ -3472,6 +3501,46 @@ function togglePdfMenu() {
   }, { once: false });
 }
 
+async function renderPdfDonut(mes) {
+  const CAT_COLORS_PDF = {'Comida':'#FF9F0A','Transporte':'#5AC8FA','Salud':'#FF6B6B','Entretenimiento':'#BF5AF2','Deporte':'#34C759','Hogar':'#FFD60A','Mascotas':'#FF8C00','Educación':'#30D5C8','Deudas':'#FF453A','Inversiones':'#C9A84C','Otros':'#8E8E93'};
+  const gastosAll = mes.filter(e => (e.type||'gasto') === 'gasto');
+  const byCat = {};
+  gastosAll.forEach(e => { byCat[e.category] = (byCat[e.category]||0) + e.amount; });
+  const entries_data = Object.entries(byCat).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]);
+  if (!entries_data.length) return '';
+
+  const labels = entries_data.map(([k]) => k);
+  const data   = entries_data.map(([,v]) => v);
+  const colors = labels.map(l => CAT_COLORS_PDF[l] || '#8E8E93');
+
+  // Canvas temporal off-screen con fondo blanco
+  const canvas = document.createElement('canvas');
+  canvas.width  = 400;
+  canvas.height = 400;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 400, 400);
+
+  const tempChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff' }] },
+    options: {
+      responsive: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      cutout: '60%'
+    }
+  });
+
+  await new Promise(r => setTimeout(r, 100));
+  const img = canvas.toDataURL('image/png');
+  tempChart.destroy();
+  return img;
+}
+
 async function exportPDF(mode) {
   document.getElementById('pdf-menu').style.display = 'none';
   showToast('Generando PDF...', '');
@@ -3493,17 +3562,9 @@ async function exportPDF(mode) {
     const totalGastosAll = gastosAll.reduce((s,e) => s + e.amount, 0);
     const mesLabel = document.getElementById('month-select')?.options[document.getElementById('month-select')?.selectedIndex]?.text || selectedMonth();
 
-    // Capturar el donut chart como imagen
+    // Renderizar donut limpio para el PDF (fondo blanco, sin dark theme)
     let chartImg = '';
-    try {
-      const prevChartType = chartType;
-      chartType = 'gasto';
-      renderCatChart(mes);
-      await new Promise(r => setTimeout(r, 300));
-      const chartCanvas = document.getElementById('chart-cat');
-      if (chartCanvas) chartImg = chartCanvas.toDataURL('image/png');
-      chartType = prevChartType;
-    } catch(e) { chartImg = ''; }
+    try { chartImg = await renderPdfDonut(mes); } catch(e) { chartImg = ''; }
 
     container.innerHTML = buildPdfMes(mesLabel, totalIngresos, totalGastos, totalPlazo, totalInvertido, balance, sortedCats, totalGastosAll, mes.length, chartImg);
   } else {

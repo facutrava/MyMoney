@@ -1400,7 +1400,7 @@ textarea { resize: vertical; min-height: 56px; }
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
         <label style="font-size:12px;color:var(--text3);white-space:nowrap;">Tipo de dólar:</label>
-        <select id="tc-tipo" style="font-size:13px;flex:1;min-width:160px;">
+        <select id="tc-tipo" onchange="fetchCotizacion()" style="font-size:13px;flex:1;min-width:160px;">
           <option value="oficial">Dólar Oficial</option>
           <option value="blue">Dólar Blue</option>
           <option value="bolsa">Dólar MEP (Bolsa)</option>

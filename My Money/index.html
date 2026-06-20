@@ -1344,7 +1344,13 @@ textarea { resize: vertical; min-height: 56px; }
   <!-- PATRIMONIO -->
   <div class="section" id="tab-patrimonio">
     <div class="card">
-      <h2 class="card-title">💼 Patrimonio Neto</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 class="card-title" style="margin:0;">💼 Patrimonio Neto</h2>
+        <div class="view-toggle">
+          <button class="vtbtn active" id="pat-ars" onclick="setPatrimonioMoneda('ARS')">ARS</button>
+          <button class="vtbtn"        id="pat-usd" onclick="setPatrimonioMoneda('USD')">USD</button>
+        </div>
+      </div>
 
       <!-- Resumen -->
       <div class="patrimonio-summary" id="patrimonio-summary">
@@ -1386,14 +1392,27 @@ textarea { resize: vertical; min-height: 56px; }
         </div>
       </div>
     </div>
-    <!-- Tipo de cambio (S2-C) -->
+    <!-- Tipo de cambio -->
     <div class="card" style="margin-top:8px;">
-      <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;">⚙️ Tipo de cambio</h3>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <label style="font-size:13px;color:var(--text2);">USD 1 = ARS</label>
-        <input type="number" id="tc-usd-ars" placeholder="1200" style="width:120px;" oninput="saveTipoCambio()" />
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 style="font-size:14px;font-weight:600;">⚙️ Tipo de cambio</h3>
+        <button id="tc-fetch-btn" onclick="fetchCotizacion()" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:5px 12px;background:var(--accent-light);border:1px solid var(--accent);color:var(--accent);border-radius:8px;cursor:pointer;">↻ Actualizar</button>
       </div>
-      <p style="font-size:11px;color:var(--text3);margin-top:8px;">Usado para convertir montos en el Patrimonio</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+        <label style="font-size:12px;color:var(--text3);white-space:nowrap;">Tipo de dólar:</label>
+        <select id="tc-tipo" style="font-size:13px;flex:1;min-width:160px;">
+          <option value="oficial">Dólar Oficial</option>
+          <option value="blue">Dólar Blue</option>
+          <option value="bolsa">Dólar MEP (Bolsa)</option>
+          <option value="cripto">Dólar CCL (Cripto)</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:13px;color:var(--text2);white-space:nowrap;">USD 1 = ARS</label>
+        <input type="number" id="tc-usd-ars" placeholder="1200" style="width:120px;" oninput="saveTipoCambio();renderPatrimonio()" />
+        <span id="tc-badge" style="font-size:11px;color:var(--text3);"></span>
+      </div>
+      <div id="tc-last-update" style="font-size:11px;color:var(--text3);margin-top:8px;"></div>
     </div>
   </div>
 
@@ -2758,7 +2777,7 @@ function showTab(name) {
   if (name === 'graficos') renderCharts();
   if (name === 'nuevo') { renderFreqAmounts(); renderTemplates(); }
   if (name === 'metas') renderGoals();
-  if (name === 'patrimonio') renderPatrimonio();
+  if (name === 'patrimonio') { renderPatrimonio(); fetchCotizacion(); }
   // Bottom nav sync
   ['nuevo','historial','graficos','metas','patrimonio'].forEach(n => {
     document.getElementById('bnav-' + n)?.classList.toggle('active', n === name);
@@ -2966,24 +2985,30 @@ function renderPatrimonio() {
   const invAmountEl  = document.getElementById('patrimonio-inv-amount');
   if (!activosList) return;
 
+  const rate  = tipoCambio.usd || 1200;
+  const isUSD = patrimonioMoneda === 'USD';
+  const cvt   = v => isUSD
+    ? 'US$ ' + (v / rate).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : fmt(v);
+
   activosList.innerHTML = patrimonio.activos.map((a,i) => `
     <div class="patrimonio-item">
       <span class="patrimonio-item-label">${a.label}</span>
-      <span class="patrimonio-item-amount">${fmt(a.amount)}</span>
+      <span class="patrimonio-item-amount">${cvt(a.amount)}</span>
       <button class="btn btn-ghost" onclick="removeActivo(${i})" style="padding:3px 8px;font-size:12px;">✕</button>
     </div>`).join('');
 
   pasivosList.innerHTML = patrimonio.pasivos.map((p,i) => `
     <div class="patrimonio-item">
       <span class="patrimonio-item-label">${p.label}</span>
-      <span class="patrimonio-item-amount" style="color:var(--red);">${fmt(p.amount)}</span>
+      <span class="patrimonio-item-amount" style="color:var(--red);">${cvt(p.amount)}</span>
       <button class="btn btn-ghost" onclick="removePasivo(${i})" style="padding:3px 8px;font-size:12px;">✕</button>
     </div>`).join('');
 
-  // Inversiones automáticas del mes
-  const totalInv = monthEntries().filter(e => e.type === 'inversion').reduce((s,e) => s+e.amount, 0);
+  // Inversiones automáticas (acumuladas, no solo del mes)
+  const totalInv = entries.filter(e => e.type === 'inversion').reduce((s,e) => s+e.amount, 0);
   if (totalInv > 0 && invItem && invAmountEl) {
-    invAmountEl.textContent = fmt(totalInv);
+    invAmountEl.textContent = cvt(totalInv);
     invItem.style.display = '';
   } else if (invItem) {
     invItem.style.display = 'none';
@@ -2993,10 +3018,10 @@ function renderPatrimonio() {
   const totalPasivos = patrimonio.pasivos.reduce((s,p) => s+p.amount, 0);
   const net = totalActivos - totalPasivos;
 
-  if (activosTotEl) activosTotEl.textContent = fmt(totalActivos);
-  if (pasivosTotEl) pasivosTotEl.textContent = fmt(totalPasivos);
+  if (activosTotEl) activosTotEl.textContent = cvt(totalActivos);
+  if (pasivosTotEl) pasivosTotEl.textContent = cvt(totalPasivos);
   if (netValEl) {
-    netValEl.textContent = fmt(net);
+    netValEl.textContent = cvt(net);
     netValEl.className = 'patrimonio-net-val ' + (net >= 0 ? 'positive' : 'negative');
   }
 }
@@ -3330,6 +3355,14 @@ function resetAllSwipes() {
 
 /* ===== S2-C: TIPO DE CAMBIO ===== */
 let tipoCambio = { usd: 1200 };
+let patrimonioMoneda = 'ARS';
+
+function setPatrimonioMoneda(m) {
+  patrimonioMoneda = m;
+  document.getElementById('pat-ars')?.classList.toggle('active', m === 'ARS');
+  document.getElementById('pat-usd')?.classList.toggle('active', m === 'USD');
+  renderPatrimonio();
+}
 
 function loadTipoCambio() {
   const uid = currentUser?.id || 'local';
@@ -3343,6 +3376,33 @@ function saveTipoCambio() {
   const uid = currentUser?.id || 'local';
   tipoCambio.usd = parseFloat(document.getElementById('tc-usd-ars')?.value) || 1200;
   localStorage.setItem('mm-tc-' + uid, JSON.stringify(tipoCambio));
+}
+
+async function fetchCotizacion() {
+  const btn     = document.getElementById('tc-fetch-btn');
+  const tipo    = document.getElementById('tc-tipo')?.value || 'oficial';
+  if (btn) { btn.textContent = '...'; btn.disabled = true; }
+  try {
+    const res  = await fetch(`https://dolarapi.com/v1/dolares/${tipo}`);
+    const data = await res.json();
+    const venta = data.venta || data.compra || 1200;
+    tipoCambio.usd = venta;
+    const usdEl = document.getElementById('tc-usd-ars');
+    if (usdEl) usdEl.value = venta;
+    const badge = document.getElementById('tc-badge');
+    if (badge) badge.textContent = `Compra: $${data.compra?.toLocaleString('es-AR')} · Venta: $${data.venta?.toLocaleString('es-AR')}`;
+    const lastUpd = document.getElementById('tc-last-update');
+    if (lastUpd) {
+      const now = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+      lastUpd.textContent = `Actualizado ${now} · Fuente: dolarapi.com`;
+    }
+    saveTipoCambio();
+    renderPatrimonio();
+    showToast('Cotización actualizada ✓', 'success');
+  } catch(e) {
+    showToast('Sin conexión — usá el valor manual', 'error');
+  }
+  if (btn) { btn.textContent = '↻ Actualizar'; btn.disabled = false; }
 }
 
 /* ===== FEATURE: EXPORTACIÓN PDF ===== */

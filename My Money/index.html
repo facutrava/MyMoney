@@ -6,7 +6,8 @@
 <title>My Money</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="/MyMoney_Logo_transparente_11.png" type="image/png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0D0D0D">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -28,6 +29,7 @@
   --text: #FFFFFF;
   --text2: #9B9B9B;
   --text3: #6B6B6B;
+  /* Acento dorado — usar solo para: balance positivo, CTAs primarios, logros */
   --accent: #C9A84C;
   --accent-hover: #E8C97A;
   --accent-light: rgba(201,168,76,0.12);
@@ -36,6 +38,11 @@
   --green-light: rgba(76,175,80,0.12);
   --red: #EF5350;
   --red-light: rgba(239,83,80,0.12);
+  /* Paleta semántica */
+  --credit: #5AC8FA;          /* A plazo / crédito */
+  --invest-color: #32D74B;    /* Inversiones */
+  --savings: #2DD4BF;         /* Metas / ahorro */
+  --info: #60A5FA;            /* Información */
   --radius: 8px;
   --radius-btn: 12px;
   --shadow: 0 2px 8px rgba(0,0,0,0.40);
@@ -71,8 +78,8 @@ body {
 .app-title {
   font-family: 'DM Sans', sans-serif;
   font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 .title-my    { color: var(--text); }
 .title-money { color: var(--accent); }
@@ -128,7 +135,7 @@ body {
 .metric-val.expense { color: var(--red); }
 .metric-val.ok      { color: var(--accent); }
 .metric-val.over    { color: var(--red); }
-.metric-val.invest  { color: #32D74B; }
+.metric-val.invest  { color: var(--invest-color); }
 
 .metric-delta { font-size: 11px; margin-top: 5px; font-weight: 500; min-height: 14px; }
 .metric-delta.up   { color: var(--green); }
@@ -324,7 +331,8 @@ textarea { resize: vertical; min-height: 56px; }
 .goal-progress-track { height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:10px; }
 .goal-progress-fill { height:100%;border-radius:3px;transition:width 0.5s ease; }
 .goal-footer { display:flex;align-items:center;gap:6px;flex-wrap:wrap; }
-.goal-pct { font-size:13px;font-weight:600;color:var(--accent);min-width:38px; }
+.goal-pct { font-size:13px;font-weight:600;color:var(--accent);min-width:38px;font-family:'DM Mono',monospace; }
+.goal-pct.achieved { color: var(--green); }
 .goal-date-label { font-size:11px;color:var(--text3);flex:1; }
 .goal-add-wrap { display:flex;gap:5px;align-items:center;margin-top:10px; }
 .goal-add-input { flex:1;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:6px 10px;outline:none;transition:border-color 0.15s; }
@@ -485,7 +493,6 @@ textarea { resize: vertical; min-height: 56px; }
   --text2: #555555;
   --text3: #999999;
 }
-[data-theme="light"] #splash { background: #F5F5F5; }
 [data-theme="light"] #auth-screen { background: var(--bg); }
 [data-theme="light"] .toast { background: var(--surface); color: var(--text); }
 [data-theme="light"] select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23999999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); }
@@ -755,7 +762,7 @@ textarea { resize: vertical; min-height: 56px; }
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #0D0D0D;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -790,8 +797,17 @@ textarea { resize: vertical; min-height: 56px; }
   border-radius: 16px; padding: 2rem; width: 100%; max-width: 360px;
   display: flex; flex-direction: column; gap: 12px;
 }
-.auth-logo { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+.auth-logo { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; text-align: center; margin-bottom: 2px; }
+.auth-tagline { font-size: 11px; color: var(--accent); font-weight: 600; text-align: center; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
 .auth-subtitle { font-size: 13px; color: var(--text2); text-align: center; margin-bottom: 4px; }
+.auth-security { font-size: 11px; color: var(--text3); text-align: center; line-height: 1.6; margin-top: 4px; }
+/* DM Mono para valores numéricos */
+.balance-hero-amount, .metric-sec-val, .metric-val, .exp-amount, .goal-pct {
+  font-family: 'DM Mono', monospace;
+}
+/* App footer */
+.app-footer { text-align: center; padding: 20px 16px 12px; font-size: 11px; color: var(--text3); display: flex; flex-direction: column; gap: 5px; }
+.app-footer-tagline { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 .auth-error { background: var(--red-light); border: 1px solid var(--red); border-radius: var(--radius); padding: 10px 12px; font-size: 13px; color: var(--red); }
 .auth-input {
   font-family: 'DM Sans', sans-serif; font-size: 14px;
@@ -887,7 +903,7 @@ textarea { resize: vertical; min-height: 56px; }
 }
 .metric-sec-val.income  { color: var(--green); }
 .metric-sec-val.expense { color: var(--red); }
-.metric-sec-val.invest  { color: #32D74B; }
+.metric-sec-val.invest  { color: var(--invest-color); }
 
 @media (max-width: 600px) {
   .balance-hero-amount { font-size: 36px; }
@@ -941,7 +957,8 @@ textarea { resize: vertical; min-height: 56px; }
 <!-- Auth screen -->
 <div id="auth-screen" style="display:none;">
   <div class="auth-card">
-    <div class="auth-logo"><span style="color:var(--text)">My</span><span style="color:var(--accent)">Money</span></div>
+    <div class="auth-logo"><span style="color:var(--text)">My</span> <span style="color:var(--accent)">Money</span></div>
+    <p class="auth-tagline">Registrá. Analizá. Crecé.</p>
     <p id="auth-subtitle" class="auth-subtitle">Iniciá sesión en tu cuenta</p>
     <div id="auth-error" class="auth-error" style="display:none;"></div>
     <div id="auth-extra-fields" style="display:none;width:100%;">
@@ -963,6 +980,7 @@ textarea { resize: vertical; min-height: 56px; }
       Continuar con Google
     </button>
     <p class="auth-toggle" id="auth-toggle-text">¿No tenés cuenta? <a onclick="toggleAuthMode()">Registrate</a></p>
+    <p class="auth-security">🔒 Datos cifrados · Solo vos podés ver tu información · Sin publicidad</p>
   </div>
 </div>
 
@@ -1017,7 +1035,7 @@ textarea { resize: vertical; min-height: 56px; }
     <!-- Paso 1 -->
     <div id="ob-step-1">
       <div style="font-size:22px;text-align:center;margin-bottom:4px;">👋</div>
-      <div style="font-size:17px;font-weight:700;text-align:center;margin-bottom:6px;">¡Bienvenido a MyMoney!</div>
+      <div style="font-size:17px;font-weight:700;text-align:center;margin-bottom:6px;">¡Bienvenido a My Money!</div>
       <p style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:16px;">Para empezar, ¿cuánto ganás aproximadamente por mes?</p>
       <label style="font-size:12px;font-weight:500;color:var(--text2);">Ingreso mensual neto (ARS)</label>
       <input type="number" id="ob-income" placeholder="Ej: 300000" style="margin-top:6px;font-size:16px;" />
@@ -1092,7 +1110,7 @@ textarea { resize: vertical; min-height: 56px; }
       <div class="metric-delta" id="m-gastos-delta"></div>
       <div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border);">
         <div class="metric-sec-label" style="margin-bottom:2px;">A plazo 💳</div>
-        <div style="font-size:14px;font-weight:600;color:#5AC8FA;font-variant-numeric:tabular-nums;" id="m-plazo">$0</div>
+        <div style="font-size:14px;font-weight:600;color:var(--credit);font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;" id="m-plazo">$0</div>
         <div class="metric-delta" id="m-plazo-delta"></div>
       </div>
     </div>
@@ -1378,6 +1396,11 @@ textarea { resize: vertical; min-height: 56px; }
       </div>
       <p style="font-size:11px;color:var(--text3);margin-top:8px;">Usado para convertir montos en el Patrimonio</p>
     </div>
+  </div>
+
+  <div class="app-footer">
+    <span class="app-footer-tagline">Registrá. Analizá. Crecé.</span>
+    <span>🔒 Datos cifrados · Solo vos podés ver tu información · Sin publicidad</span>
   </div>
 </main>
 
@@ -2240,7 +2263,7 @@ function renderGoals() {
       <div class="goal-amounts">${fmt(g.current)} de ${fmt(g.target)} ahorrado ✓</div>
       <div style="margin:8px 0 10px;"><div class="achieved-badge">🏆 ¡Meta alcanzada!</div></div>
       <div class="goal-footer">
-        <span class="goal-pct">${pct}%</span>
+        <span class="goal-pct${pct >= 100 ? ' achieved' : ''}">${pct}%</span>
         <span class="goal-date-label">${dateInfo}</span>
         <button class="btn-delete-goal" onclick="deleteGoal('${g.id}')">✕ Eliminar</button>
       </div>
@@ -2256,7 +2279,7 @@ function renderGoals() {
       <div class="goal-progress-track"><div class="goal-progress-fill" style="width:${pct}%;background:${color};"></div></div>
       ${monthlyHint}
       <div class="goal-footer">
-        <span class="goal-pct">${pct}%</span>
+        <span class="goal-pct${pct >= 100 ? ' achieved' : ''}">${pct}%</span>
         <span class="goal-date-label">${dateInfo}</span>
         <button class="btn-delete-goal" onclick="deleteGoal('${g.id}')">✕ Eliminar</button>
       </div>
@@ -3440,7 +3463,7 @@ function buildPdfMes(mesLabel, ing, gas, plazo, inv, bal, cats, totalGas, count)
     </div>
     <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Gastos por categoría (${count} movimientos)</div>
     <table style="width:100%;border-collapse:collapse;">${catsRows}</table>
-    <div style="margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:9px;color:#ccc;text-align:center;">Generado con MyMoney · mymoneyyy.netlify.app</div>
+    <div style="margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:9px;color:#ccc;text-align:center;">Generado con My Money · mymoneyyy.netlify.app</div>
   </div>`;
 }
 
@@ -3483,7 +3506,7 @@ function buildPdfAnual(year, meses, totalIng, totalGas, totalInv, cats, count) {
     </table>
     <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Top categorías de gasto</div>
     <table style="width:100%;border-collapse:collapse;">${catsRows}</table>
-    <div style="margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:9px;color:#ccc;text-align:center;">Generado con MyMoney · mymoneyyy.netlify.app</div>
+    <div style="margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:9px;color:#ccc;text-align:center;">Generado con My Money · mymoneyyy.netlify.app</div>
   </div>`;
 }
 

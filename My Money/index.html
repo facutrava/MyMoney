@@ -3167,7 +3167,23 @@ sb.auth.onAuthStateChange(async (event, session) => {
 
 // PWA Service Worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(reg => {
+    // Cuando se instala un nuevo SW, activarlo inmediatamente
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'activated') window.location.reload();
+      });
+    });
+    // Forzar chequeo de actualización cada vez que la app vuelve al foco
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update();
+    });
+  }).catch(() => {});
+  // Recargar si el SW activo avisa que hay update
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'SW_UPDATED') window.location.reload();
+  });
 }
 </script>
 </body>

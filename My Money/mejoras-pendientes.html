@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Money — Mejoras Pendientes v2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0A0A0F; --bg2: #111118; --surface: #16161F; --surface2: #1E1E2A;
+  --border: rgba(255,255,255,0.07); --border2: #2A2A38;
+  --text: #F0F0F5; --text2: #9B9BAA; --text3: #5A5A70;
+  --gold: #C9A84C; --gold-light: rgba(201,168,76,0.15);
+  --green: #34D399; --green-light: rgba(52,211,153,0.12);
+  --blue: #60A5FA; --blue-light: rgba(96,165,250,0.12);
+  --purple: #A78BFA; --purple-light: rgba(167,139,250,0.12);
+  --red: #F87171; --red-light: rgba(248,113,113,0.12);
+  --orange: #FB923C; --orange-light: rgba(251,146,60,0.12);
+  --teal: #2DD4BF; --teal-light: rgba(45,212,191,0.12);
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; font-size: 15px; }
+
+/* HERO */
+.hero { background: linear-gradient(135deg, #0A0A0F 0%, #14141F 50%, #0A0A0F 100%); border-bottom: 1px solid var(--border); padding: 64px 24px 48px; text-align: center; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(96,165,250,0.10), transparent); pointer-events: none; }
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--blue-light); border: 1px solid rgba(96,165,250,0.3); color: var(--blue); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 14px; border-radius: 100px; margin-bottom: 20px; }
+.hero h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 14px; }
+.hero h1 span { color: var(--blue); }
+.hero p { font-size: 16px; color: var(--text2); max-width: 520px; margin: 0 auto 28px; }
+.hero-stats { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; }
+.hero-stat { text-align: center; }
+.hero-stat-num { font-size: 28px; font-weight: 800; color: var(--blue); font-variant-numeric: tabular-nums; }
+.hero-stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(10,10,15,0.88); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0 24px; }
+.nav-inner { max-width: 900px; margin: 0 auto; display: flex; overflow-x: auto; scrollbar-width: none; }
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-link { padding: 14px 16px; font-size: 13px; font-weight: 500; color: var(--text3); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.15s; }
+.nav-link:hover { color: var(--text); }
+
+/* LAYOUT */
+.container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+.section { padding: 52px 0; border-bottom: 1px solid var(--border); }
+.section:last-child { border-bottom: none; }
+.section-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; padding: 4px 10px; border-radius: 6px; }
+.section-tag.blue   { color: var(--blue);   background: var(--blue-light);   }
+.section-tag.green  { color: var(--green);  background: var(--green-light);  }
+.section-tag.purple { color: var(--purple); background: var(--purple-light); }
+.section-tag.orange { color: var(--orange); background: var(--orange-light); }
+.section-tag.gold   { color: var(--gold);   background: var(--gold-light);   }
+.section-tag.teal   { color: var(--teal);   background: var(--teal-light);   }
+.section h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; }
+.section-desc { font-size: 14px; color: var(--text2); max-width: 580px; margin-bottom: 28px; }
+
+/* CARDS */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.cards.cols-2 { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; transition: border-color 0.2s, transform 0.2s; }
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
+.card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; margin-top: 10px; }
+.tag.alta   { background: rgba(248,113,113,0.15); color: var(--red); }
+.tag.media  { background: rgba(251,146,60,0.15);  color: var(--orange); }
+.tag.baja   { background: rgba(96,165,250,0.15);  color: var(--blue); }
+.tag.marca  { background: rgba(201,168,76,0.15);  color: var(--gold); }
+
+/* ROADMAP */
+.roadmap { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+.rm-sesion { margin-bottom: 32px; }
+.rm-sesion-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.rm-sesion-num { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+.rm-sesion-title { font-size: 15px; font-weight: 700; }
+.rm-sesion-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.rm-items { display: flex; flex-direction: column; gap: 8px; }
+.rm-item { display: flex; align-items: flex-start; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.rm-item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.rm-item h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.rm-item p { font-size: 12px; color: var(--text2); }
+.rm-item .esfuerzo { margin-left: auto; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 100px; flex-shrink: 0; align-self: flex-start; white-space: nowrap; }
+
+/* INSIGHT BOX */
+.insight { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; padding: 16px 18px; margin: 20px 0; font-size: 13px; color: var(--text2); }
+.insight strong { color: var(--text); }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
+.sub-title { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin: 20px 0 12px; }
+
+/* EFFORT LEGEND */
+.effort-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.el-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.el-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* FOOTER */
+.footer { padding: 36px 24px; text-align: center; color: var(--text3); font-size: 13px; border-top: 1px solid var(--border); }
+.footer strong { color: var(--gold); }
+
+@media (max-width: 600px) {
+  .cards.cols-2 { grid-template-columns: 1fr; }
+  .rm-item .esfuerzo { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📋 Backlog · Sesión 2 · Junio 2026</div>
+  <h1>Mejoras pendientes<br><span>My Money</span></h1>
+  <p>Todo lo que quedó fuera de la hoja de ruta inicial. Diseño, funcionalidades y marca — con plan de implementación por sesión.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">14</div><div class="hero-stat-label">Mejoras pendientes</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Sesiones estimadas</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">Bloques temáticos</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-link" href="#visual">Diseño visual</a>
+    <a class="nav-link" href="#funcionalidades">Funcionalidades</a>
+    <a class="nav-link" href="#marca">Marca</a>
+    <a class="nav-link" href="#roadmap">Hoja de ruta</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DISEÑO VISUAL                             -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="visual">
+  <div class="section-tag blue">🎨 Diseño visual</div>
+  <h2>Mejoras de diseño</h2>
+  <p class="section-desc">6 cambios visuales que elevan la app de "funcional" a "premium". Ninguno requiere cambios en la base de datos.</p>
+
+  <div class="cards cols-2">
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--gold-light)">🏆</div>
+      <h3>Dashboard con balance hero</h3>
+      <p>Rediseñar el área principal del dashboard: el balance en grande (48–56px) al centro como elemento dominante. Las 4 metrics actuales pasan a ser datos secundarios en una fila inferior más compacta. Es el primer impacto visual al abrir la app — define la percepción de producto.</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--text3)"><strong style="color:var(--text2)">Inspirado en:</strong> Copilot Money, Monarch Money — ambos usan el balance como hero del dashboard.</p>
+      <span class="tag alta">Impacto visual alto</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--purple-light)">🌀</div>
+      <h3>Transiciones entre tabs</h3>
+      <p>Al cambiar de pestaña (Nuevo → Historial → Gráficos), aplicar una transición de slide horizontal suave: la sección que entra viene desde la derecha, la que sale va a la izquierda. CSS puro: <code style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;">transform + opacity, 180ms ease-out</code>. La animación de fadeIn actual es básica — el slide hace que la app se sienta nativa.</p>
+      <span class="tag baja">Esfuerzo bajo</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--teal-light)">📉</div>
+      <h3>Gradiente vertical en gráficos</h3>
+      <p>Los gráficos de línea actuales tienen un fill de color plano con opacidad fija. Cambiar por un gradiente vertical con <code style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;">createLinearGradient</code> de Chart.js: color sólido arriba → totalmente transparente abajo. Son 4 líneas de JS por dataset. Diferencia visual enorme.</p>
+      <span class="tag baja">Esfuerzo bajo</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--orange-light)">🏷️</div>
+      <h3>Filas del historial con color de categoría</h3>
+      <p>Agregar un fondo ultra-suave (2–3% de opacidad del color de la categoría) en cada fila del historial. Usar <code style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;">CAT_COLORS</code> ya existente. Hace el listado mucho más escaneable: de un vistazo distinguís qué tipo de gasto es cada fila sin leer el texto.</p>
+      <span class="tag baja">Esfuerzo bajo</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--blue-light)">🖼️</div>
+      <h3>Empty states con ilustración + CTA</h3>
+      <p>Cuando no hay datos (primer uso, mes sin registros, sin metas), mostrar un SVG inline pequeño con un mensaje motivador y un botón de acción claro. Ejemplo: sin gastos este mes → ilustración de billetera + "Registrá tu primer movimiento →". Transforma un estado de confusión en una invitación.</p>
+      <span class="tag media">Esfuerzo medio</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--green-light)">🎉</div>
+      <h3>Animación de logro en Metas</h3>
+      <p>Cuando una meta llega al 100%, disparar una animación: confetti CSS o un badge animado "¡Meta alcanzada! 🎉" que aparece sobre la card. YNAB gamifica este momento con "Goal Funded!" animado — es el pico de satisfacción emocional de la app y genera retención por sí solo.</p>
+      <span class="tag media">Esfuerzo medio</span>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!-- FUNCIONALIDADES                           -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="funcionalidades">
+  <div class="section-tag green">⚡ Funcionalidades</div>
+  <h2>Features pendientes</h2>
+  <p class="section-desc">6 funcionalidades que agregan valor real sin requerir sincronización bancaria. Ordenadas de menor a mayor complejidad técnica.</p>
+
+  <div class="cards cols-2">
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--green-light)">🎯</div>
+      <h3>Metas: aporte mensual calculado</h3>
+      <p>Las metas actuales muestran el progreso pero no dicen <em>cuánto aportar</em>. Agregar el cálculo automático debajo de la barra de progreso: <strong style="color:var(--text)">"Necesitás $X/mes para llegar a tiempo"</strong> basado en (objetivo − actual) ÷ meses hasta la fecha objetivo. Si la fecha ya pasó o no hay fecha: mostrar el déficit total.</p>
+      <span class="tag baja">Esfuerzo bajo</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--orange-light)">👆</div>
+      <h3>Swipe-to-delete en mobile</h3>
+      <p>En pantallas táctiles, swipe-left sobre una fila del historial revela dos acciones: ✎ Editar (azul) y ✕ Eliminar (rojo). Touch events + CSS transform. Los botones actuales son pequeños y difíciles de tocar en mobile. Esta interacción es el estándar en todas las apps nativas de finanzas.</p>
+      <span class="tag media">Esfuerzo medio</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--blue-light)">🔮</div>
+      <h3>Proyección de flujo de caja</h3>
+      <p>Usando los gastos recurrentes detectados + el historial de ingresos: proyectar el balance estimado a 30 y 60 días. Mostrar como una línea punteada en el gráfico de tendencia, o como una card en el dashboard: <strong style="color:var(--text)">"Estimado fin de mes: +$X"</strong>. Requiere que el detector de recurrentes (ya implementado) esté activo.</p>
+      <span class="tag media">Esfuerzo medio</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--teal-light)">💱</div>
+      <h3>Multi-moneda mejorada + tipo de cambio</h3>
+      <p>Agregar moneda EUR. Mostrar un campo "Tipo de cambio ARS/USD" editable (actualizable manualmente o via API pública gratuita como <code style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;">dolarapi.com</code>). En Patrimonio: opción de ver el total convertido a USD o ARS. Esencial para usuarios con inversiones en múltiples monedas.</p>
+      <span class="tag media">Esfuerzo medio</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--purple-light)">📤</div>
+      <h3>Exportación PDF mensual</h3>
+      <p>Botón "Exportar PDF" en el tab de Gráficos: captura el dashboard del mes con <strong style="color:var(--text)">html2canvas</strong> (los gráficos visibles) y lo convierte a PDF con <strong style="color:var(--text)">jsPDF</strong> (ambas librerías CDN). El PDF incluye: resumen de métricas, gráfico donut, gráfico de tendencia, y tabla de gastos por categoría. Útil para compartir con contador o archivar.</p>
+      <span class="tag media">Esfuerzo medio</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--gold-light)">📊</div>
+      <h3>Presupuesto base cero (ZBB)</h3>
+      <p>Extender el sistema de presupuestos actual con la metodología de YNAB: mostrar prominentemente el <strong style="color:var(--text)">"dinero sin asignar"</strong> = ingresos del mes − suma de todos los presupuestos de categoría. El objetivo es llegar a $0 asignando cada peso a una categoría o meta. Requiere integrar el módulo de presupuestos con las metas de ahorro.</p>
+      <span class="tag alta">Esfuerzo alto</span>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!-- MARCA                                     -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="marca">
+  <div class="section-tag gold">🏷️ Marca</div>
+  <h2>Identidad de marca</h2>
+  <p class="section-desc">2 de las 8 mejoras de marca de la guía original que requieren trabajo de diseño o contenido, no solo código.</p>
+
+  <div class="cards cols-2">
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--gold-light)">🚀</div>
+      <h3>Onboarding estructurado</h3>
+      <p>Un flujo de 3 pasos al primer login (detectado por ausencia de entries + presupuestos):</p>
+      <p style="margin-top:8px;"><strong style="color:var(--text)">Paso 1</strong> — "¿Cuál es tu ingreso mensual aproximado?" → pre-configura el presupuesto total</p>
+      <p style="margin-top:4px;"><strong style="color:var(--text)">Paso 2</strong> — "¿Qué querés lograr?" → Ahorrar / Invertir / Salir de deudas / Todo</p>
+      <p style="margin-top:4px;"><strong style="color:var(--text)">Paso 3</strong> — "Configurá tu primer presupuesto" → abre el modal de presupuestos con el total pre-cargado</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--text3)">Según datos de YNAB, usuarios que completan el onboarding tienen 4× más retención a 30 días.</p>
+      <span class="tag alta">Impacto alto</span>
+    </div>
+
+    <div class="card">
+      <div class="card-icon" style="background:var(--blue-light)">💬</div>
+      <h3>Tono de voz alentador</h3>
+      <p>Auditar todos los textos de la app y reemplazar el copy neutro/técnico por mensajes motivadores en contexto:</p>
+      <p style="margin-top:8px;font-size:12px;">• Toast "Movimiento registrado" → <em style="color:var(--green)">"¡Listo! Cada registro cuenta 🎯"</em></p>
+      <p style="margin-top:3px;font-size:12px;">• Empty state historial → <em style="color:var(--text2)">"Todavía no hay registros. ¡El mejor momento para empezar es ahora!"</em></p>
+      <p style="margin-top:3px;font-size:12px;">• Balance positivo → <em style="color:var(--green)">"¡Vas bien este mes! +"</em></p>
+      <p style="margin-top:3px;font-size:12px;">• Meta al 100% → <em style="color:var(--gold)">"¡Meta alcanzada! Felicitaciones 🏆"</em></p>
+      <p style="margin-top:8px;font-size:12px;color:var(--text3)">No requiere librerías — solo tiempo de redacción + edición de strings en el JS.</p>
+      <span class="tag baja">Esfuerzo bajo</span>
+    </div>
+
+  </div>
+
+  <div class="insight">
+    <strong>Nota:</strong> Las otras 6 mejoras de marca de la guía original (tagline, dominio propio, ícono PWA, uso del dorado, seguridad explícita, DM Mono tipográfico) son decisiones de diseño y contenido — no requieren código nuevo y se pueden aplicar incrementalmente sin una sesión dedicada.
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!-- HOJA DE RUTA                             -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="roadmap">
+  <div class="section-tag purple">🗺️ Hoja de ruta</div>
+  <h2>Plan de implementación</h2>
+  <p class="section-desc">14 mejoras organizadas en 4 sesiones, de menor a mayor complejidad. Cada sesión es independiente y entregable.</p>
+
+  <div class="effort-legend">
+    <div class="el-item"><div class="el-dot" style="background:var(--green)"></div>Esfuerzo bajo (JS/CSS sencillo)</div>
+    <div class="el-item"><div class="el-dot" style="background:var(--orange)"></div>Esfuerzo medio (lógica + UI)</div>
+    <div class="el-item"><div class="el-dot" style="background:var(--red)"></div>Esfuerzo alto (feature compleja)</div>
+  </div>
+
+  <div class="roadmap">
+
+    <!-- SESIÓN 1 -->
+    <div class="rm-sesion">
+      <div class="rm-sesion-header">
+        <div class="rm-sesion-num" style="background:var(--green-light);color:var(--green)">S1</div>
+        <div>
+          <div class="rm-sesion-title">Sesión 1 — Pulido visual rápido</div>
+          <div class="rm-sesion-sub">5 cambios de bajo esfuerzo, alto impacto visual · ~1 hora</div>
+        </div>
+      </div>
+      <div class="rm-items">
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--green)"></div>
+          <div>
+            <h4>Gradiente vertical en gráficos de tendencia</h4>
+            <p>Reemplazar el fill plano por <code style="font-family:monospace;font-size:11px">createLinearGradient</code> en Chart.js. 4 líneas por dataset en <code style="font-family:monospace;font-size:11px">renderTrendChart()</code>.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--green-light);color:var(--green)">~20 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--green)"></div>
+          <div>
+            <h4>Filas del historial con color de categoría</h4>
+            <p>En <code style="font-family:monospace;font-size:11px">rowHTML()</code>, agregar <code style="font-family:monospace;font-size:11px">background: rgba(CAT_COLOR, 0.03)</code> al div de la fila.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--green-light);color:var(--green)">~15 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--green)"></div>
+          <div>
+            <h4>Transiciones entre tabs (slide)</h4>
+            <p>CSS: keyframe de slide-in-right. JS: detectar dirección del tab (izq/der) y aplicar la clase correcta.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--green-light);color:var(--green)">~20 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--green)"></div>
+          <div>
+            <h4>Metas: aporte mensual calculado</h4>
+            <p>En <code style="font-family:monospace;font-size:11px">renderGoals()</code>, calcular (objetivo − actual) ÷ meses restantes y mostrarlo debajo de la barra.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--green-light);color:var(--green)">~15 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--green)"></div>
+          <div>
+            <h4>Tono de voz alentador</h4>
+            <p>Actualizar strings en: toasts de éxito, empty states (historial, metas, gráficos), y mensaje de balance positivo/negativo.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--green-light);color:var(--green)">~10 min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESIÓN 2 -->
+    <div class="rm-sesion">
+      <div class="rm-sesion-header">
+        <div class="rm-sesion-num" style="background:var(--orange-light);color:var(--orange)">S2</div>
+        <div>
+          <div class="rm-sesion-title">Sesión 2 — UX mobile + features de datos</div>
+          <div class="rm-sesion-sub">4 mejoras de esfuerzo medio · ~2-3 horas</div>
+        </div>
+      </div>
+      <div class="rm-items">
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--orange)"></div>
+          <div>
+            <h4>Swipe-to-delete en mobile</h4>
+            <p>Touch events (<code style="font-family:monospace;font-size:11px">touchstart/touchend</code>) en <code style="font-family:monospace;font-size:11px">rowHTML()</code>. Si desplazamiento X &gt; 60px, mostrar panel de acciones con CSS transform.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--orange-light);color:var(--orange)">~45 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--orange)"></div>
+          <div>
+            <h4>Animación de logro en Metas</h4>
+            <p>Detectar en <code style="font-family:monospace;font-size:11px">renderGoals()</code> si pct ≥ 100. Disparar CSS keyframe de confetti + badge "¡Meta alcanzada! 🏆" con animación de scale.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--orange-light);color:var(--orange)">~30 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--orange)"></div>
+          <div>
+            <h4>Multi-moneda mejorada + tipo de cambio</h4>
+            <p>Agregar EUR al selector. Campo manual de tipo de cambio ARS/USD en config. En Patrimonio: toggle para ver totales en ARS o USD.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--orange-light);color:var(--orange)">~60 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--orange)"></div>
+          <div>
+            <h4>Empty states ilustrados</h4>
+            <p>Diseñar 4 SVGs simples (wallet, chart, target, star) para: sin historial, sin gráficos, sin metas, sin inversiones. Con CTA inline.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--orange-light);color:var(--orange)">~45 min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESIÓN 3 -->
+    <div class="rm-sesion">
+      <div class="rm-sesion-header">
+        <div class="rm-sesion-num" style="background:var(--orange-light);color:var(--orange)">S3</div>
+        <div>
+          <div class="rm-sesion-title">Sesión 3 — Features premium</div>
+          <div class="rm-sesion-sub">3 funcionalidades de alto valor · ~3-4 horas</div>
+        </div>
+      </div>
+      <div class="rm-items">
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--orange)"></div>
+          <div>
+            <h4>Dashboard con balance hero</h4>
+            <p>Rediseñar el área principal: balance en 52px al centro, metrics secundarias en fila compacta debajo. Requiere refactor del HTML de <code style="font-family:monospace;font-size:11px">.metrics</code> y CSS del dashboard.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--orange-light);color:var(--orange)">~60 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--orange)"></div>
+          <div>
+            <h4>Proyección de flujo de caja</h4>
+            <p>Usar recurrentes detectados + ingresos históricos para proyectar balance a 30/60 días. Mostrar como card en dashboard con flecha de tendencia.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--orange-light);color:var(--orange)">~60 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--red)"></div>
+          <div>
+            <h4>Exportación PDF mensual</h4>
+            <p>Agregar CDN de html2canvas + jsPDF. Función que captura el dashboard (gráficos + métricas) y genera PDF descargable con formato carta.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--red-light);color:var(--red)">~90 min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESIÓN 4 -->
+    <div class="rm-sesion">
+      <div class="rm-sesion-header">
+        <div class="rm-sesion-num" style="background:var(--red-light);color:var(--red)">S4</div>
+        <div>
+          <div class="rm-sesion-title">Sesión 4 — Features complejas + marca</div>
+          <div class="rm-sesion-sub">2 features de alta complejidad + onboarding · ~4-5 horas</div>
+        </div>
+      </div>
+      <div class="rm-items">
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--red)"></div>
+          <div>
+            <h4>Presupuesto base cero (ZBB)</h4>
+            <p>Integrar módulo de presupuestos con ingresos del mes: mostrar "dinero sin asignar" en tiempo real. Card en dashboard con distribución visual de cada peso asignado. Requiere vincular budgets + metas + ingresos en una sola vista.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--red-light);color:var(--red)">~120 min</span>
+        </div>
+        <div class="rm-item">
+          <div class="rm-item-dot" style="background:var(--red)"></div>
+          <div>
+            <h4>Onboarding estructurado (3 pasos)</h4>
+            <p>Detectar primer uso (sin entries + sin budgets). Modal de 3 pasos: ingreso mensual → objetivo → presupuesto inicial. Con skip option. Guardar estado de onboarding en localStorage/Supabase.</p>
+          </div>
+          <span class="esfuerzo" style="background:var(--red-light);color:var(--red)">~90 min</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="insight">
+    <strong>Recomendación de orden:</strong> La Sesión 1 es la de mayor ROI — 5 mejoras visuales rápidas que hacen que la app se vea radicalmente más premium sin tocar la lógica de datos. Se puede hacer en una sola conversación. Las Sesiones 3 y 4 son opcionales según el roadmap de producto: tienen más impacto en retención a largo plazo pero son las más complejas de implementar correctamente.
+  </div>
+
+</section>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Backlog v2 para <strong>My Money</strong> · Junio 2026 · Complemento de la Guía de Mejoras inicial
+</div>
+
+</body>
+</html>

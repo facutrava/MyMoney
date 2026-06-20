@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Money — Mockups S3 + S4</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0D0D;--surface:#1A1A1A;--surface2:#222;--surface3:#2A2A2A;
+  --border:rgba(255,255,255,0.06);--border2:#333;
+  --text:#FFF;--text2:#9B9B9B;--text3:#6B6B6B;
+  --accent:#C9A84C;--accent-hover:#E8C97A;--accent-light:rgba(201,168,76,0.12);
+  --green:#4CAF50;--green-light:rgba(76,175,80,0.12);
+  --red:#EF5350;--red-light:rgba(239,83,80,0.12);
+  --blue:#60A5FA;--blue-light:rgba(96,165,250,0.12);
+  --purple:#A78BFA;--purple-light:rgba(167,139,250,0.12);
+}
+body{font-family:'DM Sans',sans-serif;background:#111;color:var(--text);line-height:1.5;font-size:14px;}
+
+/* PAGE LAYOUT */
+.page-header{background:#0A0A0A;border-bottom:1px solid var(--border);padding:20px 24px;position:sticky;top:0;z-index:50;}
+.page-header h1{font-size:18px;font-weight:700;}<br>.page-header p{font-size:12px;color:var(--text3);margin-top:2px;}
+.toc{display:flex;gap:6px;flex-wrap:wrap;padding:16px 24px;background:#0D0D0D;border-bottom:1px solid var(--border);}
+.toc-btn{font-size:12px;font-weight:500;padding:5px 12px;border:1px solid var(--border2);border-radius:20px;background:none;color:var(--text2);cursor:pointer;transition:all 0.15s;}
+.toc-btn:hover{border-color:var(--accent);color:var(--accent);}
+.sections-wrap{max-width:860px;margin:0 auto;padding:32px 24px 80px;}
+
+/* SECTION HEADER */
+.mock-section{margin-bottom:56px;}
+.mock-section-label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:6px;margin-bottom:10px;}
+.mock-section-label.s3{background:var(--blue-light);color:var(--blue);}
+.mock-section-label.s4{background:var(--purple-light);color:var(--purple);}
+.mock-section h2{font-size:20px;font-weight:700;margin-bottom:4px;}
+.mock-section p.desc{font-size:13px;color:var(--text2);margin-bottom:20px;max-width:560px;}
+.impl-note{font-size:11px;color:var(--text3);background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:16px;}
+.impl-note strong{color:var(--text2);}
+
+/* DEVICE FRAME */
+.device{background:var(--bg);border:1px solid var(--border2);border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.6);}
+.device-header{background:var(--bg);border-bottom:1px solid var(--border);padding:0 16px;height:48px;display:flex;align-items:center;justify-content:space-between;}
+.device-title{font-size:16px;font-weight:700;}.device-title span{color:var(--accent);}
+.device-body{padding:14px;}
+
+/* MY MONEY COMPONENTS */
+.mm-card{background:var(--surface);border-radius:8px;padding:14px;margin-bottom:8px;}
+.mm-card-title{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text);}
+.mm-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.mm-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;}
+.mm-val.ok{color:var(--accent);}
+.mm-val.income{color:var(--green);}
+.mm-val.expense{color:var(--red);}
+.mm-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;border-radius:10px;padding:9px 16px;cursor:pointer;transition:all .15s;}
+.mm-btn.primary{background:var(--accent);color:#000;width:100%;}
+.mm-btn.ghost{background:none;border:1px solid var(--border2);color:var(--text2);}
+.mm-progress-track{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-top:6px;}
+.mm-progress-fill{height:100%;border-radius:3px;}
+.mm-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;border:1px solid var(--border2);color:var(--text2);background:var(--surface2);}
+.mm-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.mm-row:last-child{border-bottom:none;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:100px;}
+.badge.green{background:var(--green-light);color:var(--green);}
+.badge.red{background:var(--red-light);color:var(--red);}
+.badge.accent{background:var(--accent-light);color:var(--accent);}
+.badge.blue{background:var(--blue-light);color:var(--blue);}
+.input-mock{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text2);width:100%;}
+.divider{height:1px;background:var(--border);margin:10px 0;}
+.tab-bar{display:flex;gap:2px;background:var(--surface);border-radius:8px;padding:3px;margin-bottom:12px;}
+.tab-item{flex:1;padding:7px 4px;font-size:12px;font-weight:500;color:var(--text3);border:none;background:none;border-radius:6px;text-align:center;cursor:pointer;}
+.tab-item.active{background:var(--surface2);color:var(--accent);}
+.annotation{position:absolute;background:var(--accent);color:#000;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;white-space:nowrap;}
+.callout{background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--blue);margin-top:8px;}
+.callout.gold{background:var(--accent-light);border-color:rgba(201,168,76,0.25);color:var(--accent);}
+.callout.green{background:var(--green-light);border-color:rgba(76,175,80,0.2);color:var(--green);}
+.callout.red{background:var(--red-light);border-color:rgba(239,83,80,0.2);color:var(--red);}
+
+/* ANNOTATIONS */
+.mockup-wrap{position:relative;}
+.arrow-note{display:flex;align-items:flex-start;gap:8px;margin-top:8px;padding:6px 10px;background:rgba(96,165,250,0.06);border-left:2px solid var(--blue);border-radius:0 6px 6px 0;}
+.arrow-note span{font-size:11px;color:var(--text3);}
+.arrow-note strong{color:var(--blue);}
+
+/* SIDEBAR LAYOUT */
+.side-layout{display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start;}
+@media(max-width:700px){.side-layout{grid-template-columns:1fr;}.grid-4{grid-template-columns:1fr 1fr;}}
+.notes-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.notes-panel h3{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+.note-item{display:flex;gap:8px;margin-bottom:10px;font-size:12px;color:var(--text2);}
+.note-item::before{content:'→';color:var(--accent);flex-shrink:0;font-weight:700;}
+
+/* ZBB Specific */
+.zbbar{height:24px;border-radius:6px;overflow:hidden;display:flex;margin:8px 0;}
+.zbbar-seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;transition:width .3s;}
+.zb-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.zb-legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);}
+.zb-dot{width:8px;height:8px;border-radius:2px;}
+
+/* Onboarding */
+.ob-step{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;color:var(--text2);}
+.ob-step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.ob-step-num.done{background:var(--green-light);color:var(--green);}
+.ob-step-num.active{background:var(--accent-light);color:var(--accent);}
+.ob-step-num.todo{background:var(--surface2);color:var(--text3);}
+.ob-option{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:6px;}
+.ob-option.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent);}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>My<span style="color:var(--accent)">Money</span> — Mockups Sesiones 3 y 4</h1>
+  <p>Visualización de cómo quedarían implementadas las features antes de codearlas</p>
+</div>
+
+<div class="toc">
+  <button class="toc-btn" onclick="document.getElementById('s3-hero').scrollIntoView({behavior:'smooth'})">S3-A: Balance Hero</button>
+  <button class="toc-btn" onclick="document.getElementById('s3-cashflow').scrollIntoView({behavior:'smooth'})">S3-B: Flujo de caja</button>
+  <button class="toc-btn" onclick="document.getElementById('s3-pdf').scrollIntoView({behavior:'smooth'})">S3-C: Export PDF</button>
+  <button class="toc-btn" onclick="document.getElementById('s4-zbb').scrollIntoView({behavior:'smooth'})">S4-A: Presupuesto ZBB</button>
+  <button class="toc-btn" onclick="document.getElementById('s4-onboarding').scrollIntoView({behavior:'smooth'})">S4-B: Onboarding</button>
+</div>
+
+<div class="sections-wrap">
+
+<!-- ═══════════════════════════════════════ -->
+<!-- S3-A: DASHBOARD BALANCE HERO           -->
+<!-- ═══════════════════════════════════════ -->
+<div class="mock-section" id="s3-hero">
+  <div class="mock-section-label s3">Sesión 3 · Feature A</div>
+  <h2>Dashboard con Balance Hero</h2>
+  <p class="desc">El balance pasa a ser el elemento visual dominante del dashboard. Las otras métricas quedan en fila secundaria más compacta debajo.</p>
+  <div class="impl-note"><strong>Implementación:</strong> Refactor del HTML de <code>.metrics</code>. Nuevo elemento hero encima del grid actual. CSS: balance en 48–52px, peso 800. Las 4 cards quedan en una sola fila de menor tamaño.</div>
+
+  <div class="side-layout">
+    <div>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;">↓ Nuevo diseño propuesto</p>
+      <div class="device">
+        <div class="device-header">
+          <span class="device-title">My<span>Money</span></span>
+          <select style="font-size:12px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:3px 8px;">
+            <option>Junio 2026</option>
+          </select>
+        </div>
+        <div class="device-body">
+
+          <!-- HERO BALANCE -->
+          <div class="mm-card" style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,#1A1A1A,#222);border:1px solid rgba(201,168,76,0.15);">
+            <div class="mm-label" style="text-align:center;margin-bottom:8px;">Balance del mes</div>
+            <div style="font-size:48px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:-0.02em;line-height:1;">+$127.500</div>
+            <div style="font-size:11px;color:var(--green);margin-top:6px;">▲ 18% vs mes anterior</div>
+            <div class="callout gold" style="margin-top:12px;text-align:left;">💡 Este mes gastaste menos que en mayo. ¡Buen trabajo!</div>
+          </div>
+
+          <!-- METRICS SECUNDARIAS -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0;">
+            <div style="background:var(--surface);border-radius:6px;padding:10px 8px;">
+              <div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:3px;">Ingresos</div>
+              <div style="font-size:14px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;">$280k</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px;">▲ 5%</div>
+            </div>
+            <div style="background:var(--surface);border-radius:6px;padding:10px 8px;">
+              <div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:3px;">Gastos</div>
+              <div style="font-size:14px;font-weight:700;color:var(--red);font-variant-numeric:tabular-nums;">$112k</div>
+              <div style="font-size:9px;color:var(--green);margin-top:2px;">▼ 8%</div>
+            </div>
+            <div style="background:var(--surface);border-radius:6px;padding:10px 8px;">
+              <div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:3px;">A plazo</div>
+              <div style="font-size:14px;font-weight:700;color:#5AC8FA;font-variant-numeric:tabular-nums;">$28k</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px;">— 0%</div>
+            </div>
+            <div style="background:var(--surface);border-radius:6px;padding:10px 8px;">
+              <div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:3px;">Invertido</div>
+              <div style="font-size:14px;font-weight:700;color:#32D74B;font-variant-numeric:tabular-nums;">$40k</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px;">▲ 12%</div>
+            </div>
+          </div>
+
+          <!-- SPENDING BAR -->
+          <div style="background:var(--surface);border-radius:6px;padding:8px 10px;">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px;"><span>Presupuesto consumido</span><span style="color:var(--green);font-weight:600;">58%</span></div>
+            <div class="mm-progress-track"><div class="mm-progress-fill" style="width:58%;background:var(--green);"></div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-panel">
+      <h3>Notas de implementación</h3>
+      <div class="note-item">El balance hero reemplaza una de las 4 cards actuales — ocupa todo el ancho</div>
+      <div class="note-item">Las 4 métricas quedan en una fila más compacta (font-size 14px vs 22px actual)</div>
+      <div class="note-item">El <code style="font-family:monospace;font-size:11px">callout gold</code> del insight automático (ya implementado) encaja naturalmente dentro de la hero card</div>
+      <div class="note-item">Requiere refactor del HTML de <code style="font-family:monospace;font-size:11px">.metrics</code> y ajuste de CSS de spending-bar-wrap</div>
+      <div class="note-item">El gradiente diagonal de la hero card (135deg) lo diferencia del resto de cards planas</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- S3-B: PROYECCIÓN DE FLUJO DE CAJA      -->
+<!-- ═══════════════════════════════════════ -->
+<div class="mock-section" id="s3-cashflow">
+  <div class="mock-section-label s3">Sesión 3 · Feature B</div>
+  <h2>Proyección de flujo de caja</h2>
+  <p class="desc">Card en el dashboard que proyecta el balance estimado a fin de mes usando los gastos recurrentes detectados e ingresos históricos.</p>
+  <div class="impl-note"><strong>Implementación:</strong> Usa el detector de recurrentes (ya implementado). Toma el promedio de ingresos de los 3 últimos meses como ingreso esperado. Suma gastos recurrentes detectados × días restantes del mes. Muestra proyección como card debajo del balance hero.</div>
+
+  <div class="side-layout">
+    <div class="device">
+      <div class="device-header">
+        <span class="device-title">My<span>Money</span></span>
+        <span style="font-size:11px;color:var(--text3);">20 jun · 11 días restantes</span>
+      </div>
+      <div class="device-body">
+
+        <div class="mm-card" style="border:1px solid rgba(96,165,250,0.2);background:rgba(96,165,250,0.05);">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <span style="font-size:16px;">🔮</span>
+            <span style="font-size:13px;font-weight:600;color:var(--blue);">Proyección a fin de mes</span>
+          </div>
+
+          <div class="grid-2" style="gap:8px;margin-bottom:10px;">
+            <div style="background:var(--surface);border-radius:6px;padding:10px;">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">Ingreso esperado</div>
+              <div style="font-size:16px;font-weight:700;color:var(--green);">+$280.000</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px;">Promedio últimos 3 meses</div>
+            </div>
+            <div style="background:var(--surface);border-radius:6px;padding:10px;">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">Gastos proyectados</div>
+              <div style="font-size:16px;font-weight:700;color:var(--red);">−$165.000</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px;">Recurrentes + ritmo actual</div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid rgba(96,165,250,0.15);padding-top:10px;">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Balance estimado al 30 jun</div>
+            <div style="font-size:26px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums;">+$115.000</div>
+            <div class="mm-progress-track" style="margin-top:8px;">
+              <div class="mm-progress-fill" style="width:41%;background:var(--green);"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:3px;"><span>$0</span><span>+$280k</span></div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Recurrentes detectados este mes</div>
+            <div class="mm-row" style="font-size:11px;">
+              <span style="color:var(--text2);">🎵 Spotify</span>
+              <span style="color:var(--red);">−$3.500/mes</span>
+            </div>
+            <div class="mm-row" style="font-size:11px;">
+              <span style="color:var(--text2);">🏠 Expensas</span>
+              <span style="color:var(--red);">−$42.000/mes</span>
+            </div>
+            <div class="mm-row" style="font-size:11px;">
+              <span style="color:var(--text2);">🏋️ Gimnasio</span>
+              <span style="color:var(--red);">−$18.000/mes</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="notes-panel">
+      <h3>Notas de implementación</h3>
+      <div class="note-item">Toma el resultado de <code style="font-family:monospace;font-size:11px">detectRecurrentes()</code> (ya existe) como lista de gastos fijos del mes</div>
+      <div class="note-item">Ingreso esperado = promedio de ingresos de los últimos 3 meses del array <code style="font-family:monospace;font-size:11px">entries</code></div>
+      <div class="note-item">Gastos proyectados = gastos ya registrados este mes + recurrentes no registrados aún este mes</div>
+      <div class="note-item">Solo se muestra si hay al menos 2 meses de historial</div>
+      <div class="note-item">Color del balance proyectado: verde si positivo, rojo si negativo</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- S3-C: EXPORTACIÓN PDF                  -->
+<!-- ═══════════════════════════════════════ -->
+<div class="mock-section" id="s3-pdf">
+  <div class="mock-section-label s3">Sesión 3 · Feature C</div>
+  <h2>Exportación PDF mensual</h2>
+  <p class="desc">Botón en Gráficos que genera un resumen del mes en PDF con métricas, gráfico donut y tabla de gastos por categoría.</p>
+  <div class="impl-note"><strong>Implementación:</strong> CDN de <code>html2canvas</code> + <code>jsPDF</code>. Función <code>exportPDF()</code> que captura un div oculto con el layout del resumen, lo convierte a imagen y genera el PDF descargable.</div>
+
+  <div class="side-layout">
+    <div>
+      <!-- Botón en la app -->
+      <p style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;">↓ Botón en el tab Gráficos</p>
+      <div class="device" style="margin-bottom:16px;">
+        <div class="device-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:14px;font-weight:600;">Por categoría</span>
+            <div style="display:flex;gap:6px;">
+              <span style="font-size:11px;padding:4px 10px;border:1px solid var(--border2);border-radius:6px;color:var(--text2);">Gastos</span>
+              <span style="font-size:11px;padding:4px 10px;border:1px solid var(--border2);border-radius:6px;color:var(--text2);">Ingresos</span>
+              <span style="font-size:11px;padding:4px 10px;background:var(--accent-light);border:1px solid var(--accent);border-radius:6px;color:var(--accent);">📄 PDF</span>
+            </div>
+          </div>
+          <div class="callout" style="font-size:11px;">Al hacer click en <strong>📄 PDF</strong>, se descarga el resumen del mes seleccionado</div>
+        </div>
+      </div>
+
+      <!-- Preview del PDF -->
+      <p style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;">↓ Contenido del PDF generado</p>
+      <div style="background:#fff;border-radius:8px;padding:20px;color:#111;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #eee;">
+          <div>
+            <div style="font-size:20px;font-weight:800;">My<span style="color:#C9A84C;">Money</span></div>
+            <div style="font-size:11px;color:#999;margin-top:2px;">Resumen mensual — Junio 2026</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:#999;">Balance del mes</div>
+            <div style="font-size:24px;font-weight:800;color:#C9A84C;">+$127.500</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+          <div style="background:#f8f8f8;border-radius:6px;padding:10px;">
+            <div style="font-size:9px;color:#999;text-transform:uppercase;font-weight:600;letter-spacing:.06em;margin-bottom:3px;">Ingresos</div>
+            <div style="font-size:18px;font-weight:700;color:#4CAF50;">$280.000</div>
+          </div>
+          <div style="background:#f8f8f8;border-radius:6px;padding:10px;">
+            <div style="font-size:9px;color:#999;text-transform:uppercase;font-weight:600;letter-spacing:.06em;margin-bottom:3px;">Gastos</div>
+            <div style="font-size:18px;font-weight:700;color:#EF5350;">$112.500</div>
+          </div>
+          <div style="background:#f8f8f8;border-radius:6px;padding:10px;">
+            <div style="font-size:9px;color:#999;text-transform:uppercase;font-weight:600;letter-spacing:.06em;margin-bottom:3px;">Invertido</div>
+            <div style="font-size:18px;font-weight:700;color:#32D74B;">$40.000</div>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Gastos por categoría</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:#555;width:90px;">🍔 Comida</span>
+            <div style="flex:1;height:6px;background:#eee;border-radius:3px;"><div style="width:52%;height:100%;background:#FF9F0A;border-radius:3px;"></div></div>
+            <span style="font-size:11px;color:#333;font-weight:600;width:60px;text-align:right;">$58.500</span>
+            <span style="font-size:10px;color:#999;width:28px;">52%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:#555;width:90px;">🚗 Transporte</span>
+            <div style="flex:1;height:6px;background:#eee;border-radius:3px;"><div style="width:22%;height:100%;background:#5AC8FA;border-radius:3px;"></div></div>
+            <span style="font-size:11px;color:#333;font-weight:600;width:60px;text-align:right;">$24.500</span>
+            <span style="font-size:10px;color:#999;width:28px;">22%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:#555;width:90px;">🏠 Hogar</span>
+            <div style="flex:1;height:6px;background:#eee;border-radius:3px;"><div style="width:16%;height:100%;background:#FFD60A;border-radius:3px;"></div></div>
+            <span style="font-size:11px;color:#333;font-weight:600;width:60px;text-align:right;">$18.000</span>
+            <span style="font-size:10px;color:#999;width:28px;">16%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:#555;width:90px;">🎬 Entret.</span>
+            <div style="flex:1;height:6px;background:#eee;border-radius:3px;"><div style="width:10%;height:100%;background:#BF5AF2;border-radius:3px;"></div></div>
+            <span style="font-size:11px;color:#333;font-weight:600;width:60px;text-align:right;">$11.500</span>
+            <span style="font-size:10px;color:#999;width:28px;">10%</span>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#ccc;text-align:center;">Generado con MyMoney · mymoneyyy.netlify.app</div>
+      </div>
+    </div>
+
+    <div class="notes-panel">
+      <h3>Notas de implementación</h3>
+      <div class="note-item">Agregar en <code style="font-family:monospace;font-size:11px">&lt;head&gt;</code>: CDN de html2canvas y jsPDF</div>
+      <div class="note-item">Div oculto <code style="font-family:monospace;font-size:11px">#pdf-template</code> con fondo blanco — este es el contenido del PDF (no el dark theme)</div>
+      <div class="note-item"><code style="font-family:monospace;font-size:11px">html2canvas(#pdf-template)</code> captura ese div como imagen</div>
+      <div class="note-item"><code style="font-family:monospace;font-size:11px">jsPDF.addImage()</code> inserta la imagen y <code style="font-family:monospace;font-size:11px">.save()</code> descarga el archivo</div>
+      <div class="note-item">El botón PDF puede ir en el header del tab Gráficos junto al toggle de tipo</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- S4-A: PRESUPUESTO BASE CERO (ZBB)      -->
+<!-- ═══════════════════════════════════════ -->
+<div class="mock-section" id="s4-zbb">
+  <div class="mock-section-label s4">Sesión 4 · Feature A</div>
+  <h2>Presupuesto base cero (ZBB)</h2>
+  <p class="desc">Cada peso de ingreso se asigna a una categoría o meta. El "dinero sin asignar" se muestra prominentemente y baja a medida que completás el presupuesto.</p>
+  <div class="impl-note"><strong>Implementación:</strong> Extender el módulo de presupuestos actual. Nueva card en el dashboard que calcula: ingresos del mes − suma de todos los budgets de categorías − suma de metas activas = dinero sin asignar. Enlaza con el modal de presupuestos.</div>
+
+  <div class="side-layout">
+    <div class="device">
+      <div class="device-header">
+        <span class="device-title">My<span>Money</span> · Presupuesto</span>
+      </div>
+      <div class="device-body">
+
+        <!-- ZBB HERO -->
+        <div class="mm-card" style="border:1px solid rgba(201,168,76,0.2);margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+            <div>
+              <div class="mm-label">Dinero sin asignar</div>
+              <div style="font-size:28px;font-weight:800;color:var(--orange);font-variant-numeric:tabular-nums;">$35.000</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:2px;">de $280.000 de ingresos del mes</div>
+            </div>
+            <button style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;background:var(--accent-light);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:6px 12px;cursor:pointer;">Asignar →</button>
+          </div>
+
+          <!-- Barra ZBB -->
+          <div style="margin-bottom:8px;">
+            <div class="zbbar">
+              <div class="zbbar-seg" style="width:40%;background:#FF9F0A;">Comida</div>
+              <div class="zbbar-seg" style="width:15%;background:#5AC8FA;">Trans.</div>
+              <div class="zbbar-seg" style="width:10%;background:#FFD60A;">Hogar</div>
+              <div class="zbbar-seg" style="width:8%;background:#BF5AF2;">Entret.</div>
+              <div class="zbbar-seg" style="width:14%;background:var(--green);">Metas</div>
+              <div class="zbbar-seg" style="width:13%;background:var(--surface3);color:var(--text3);">Sin asignar</div>
+            </div>
+            <div class="zb-legend">
+              <div class="zb-legend-item"><div class="zb-dot" style="background:#FF9F0A;"></div>Comida $112k</div>
+              <div class="zb-legend-item"><div class="zb-dot" style="background:#5AC8FA;"></div>Transporte $42k</div>
+              <div class="zb-legend-item"><div class="zb-dot" style="background:var(--green);"></div>Metas $39k</div>
+              <div class="zb-legend-item"><div class="zb-dot" style="background:var(--surface3);"></div>Sin asignar $35k</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POR CATEGORÍA -->
+        <div class="mm-card">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;">Asignado por categoría</div>
+          <div class="mm-row">
+            <span style="font-size:12px;">🍔 Comida</span>
+            <div style="text-align:right;">
+              <div style="font-size:12px;font-weight:600;">$112.000 / $120.000</div>
+              <div style="font-size:10px;color:var(--text3);">93% — quedan $8.000</div>
+            </div>
+          </div>
+          <div class="mm-progress-track"><div class="mm-progress-fill" style="width:93%;background:#FF9F0A;"></div></div>
+          <div class="mm-row" style="margin-top:8px;">
+            <span style="font-size:12px;">🎯 Meta: Vacaciones</span>
+            <div style="text-align:right;">
+              <div style="font-size:12px;font-weight:600;">$19.500 / $39.000</div>
+              <div style="font-size:10px;color:var(--text3);">50%</div>
+            </div>
+          </div>
+          <div class="mm-progress-track"><div class="mm-progress-fill" style="width:50%;background:var(--green);"></div></div>
+          <div style="margin-top:10px;">
+            <div class="callout gold" style="font-size:11px;">💡 Tenés <strong>$35.000 sin asignar</strong>. Asignalos a una categoría o meta para llegar a $0.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="notes-panel">
+      <h3>Notas de implementación</h3>
+      <div class="note-item">Cálculo: <code style="font-family:monospace;font-size:11px">totalIngresos − Σbudgets − Σmetas_mensuales = sinAsignar</code></div>
+      <div class="note-item">La barra ZBB usa segmentos con width proporcional al porcentaje de cada categoría sobre el total de ingresos</div>
+      <div class="note-item">Cuando <code style="font-family:monospace;font-size:11px">sinAsignar === 0</code>: mostrar "🎉 ¡Todo asignado! Presupuesto completo"</div>
+      <div class="note-item">Cuando <code style="font-family:monospace;font-size:11px">sinAsignar &lt; 0</code>: presupuesto sobreasignado — mostrar en rojo</div>
+      <div class="note-item">El botón "Asignar →" abre el modal de presupuestos existente</div>
+      <div class="note-item">Esta card aparece en el tab Nuevo, debajo del balance hero</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- S4-B: ONBOARDING ESTRUCTURADO          -->
+<!-- ═══════════════════════════════════════ -->
+<div class="mock-section" id="s4-onboarding">
+  <div class="mock-section-label s4">Sesión 4 · Feature B</div>
+  <h2>Onboarding estructurado</h2>
+  <p class="desc">Flujo de 3 pasos que aparece solo la primera vez (sin entries + sin budgets). Configura el punto de partida del usuario en &lt;60 segundos.</p>
+  <div class="impl-note"><strong>Implementación:</strong> Modal de 3 pasos encima de la app. Detectar primer uso en el boot: <code>entries.length === 0 && Object.keys(budgets).length === 0 && !localStorage.getItem('mm-onboarding-done')</code>. Al finalizar: guardar flag y cerrar.</div>
+
+  <div class="side-layout">
+    <div>
+      <!-- PASO 1 -->
+      <p style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;">Paso 1 de 3 — Ingreso mensual</p>
+      <div class="device" style="margin-bottom:16px;">
+        <div class="device-body">
+          <div style="display:flex;gap:6px;margin-bottom:16px;">
+            <div class="ob-step-num active">1</div>
+            <div class="ob-step-num todo">2</div>
+            <div class="ob-step-num todo">3</div>
+            <div style="flex:1;display:flex;align-items:center;"><div style="flex:1;height:1px;background:var(--border2);"></div></div>
+          </div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:4px;">¿Cuánto ganás por mes?</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Usamos esto para configurar tu presupuesto inicial. Podés cambiarlo después.</div>
+          <div class="input-mock" style="font-size:16px;color:var(--text);margin-bottom:4px;">$ 280.000</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:14px;">Ingreso neto mensual aproximado (ARS)</div>
+          <button class="mm-btn primary">Continuar →</button>
+          <button style="width:100%;margin-top:6px;font-family:'DM Sans',sans-serif;font-size:12px;background:none;border:none;color:var(--text3);cursor:pointer;padding:6px;">Saltear por ahora</button>
+        </div>
+      </div>
+
+      <!-- PASO 2 -->
+      <p style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;">Paso 2 de 3 — Objetivo principal</p>
+      <div class="device" style="margin-bottom:16px;">
+        <div class="device-body">
+          <div style="display:flex;gap:6px;margin-bottom:16px;">
+            <div class="ob-step-num done">✓</div>
+            <div class="ob-step-num active">2</div>
+            <div class="ob-step-num todo">3</div>
+            <div style="flex:1;display:flex;align-items:center;"><div style="flex:1;height:1px;background:var(--border2);"></div></div>
+          </div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:4px;">¿Qué querés lograr?</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Esto personaliza las sugerencias de My Money para vos.</div>
+          <div class="ob-option selected">💰 Ahorrar más cada mes</div>
+          <div class="ob-option">📈 Hacer crecer mis inversiones</div>
+          <div class="ob-option">💳 Salir de deudas</div>
+          <div class="ob-option">📊 Solo quiero registrar y entender mis gastos</div>
+          <button class="mm-btn primary" style="margin-top:10px;">Continuar →</button>
+        </div>
+      </div>
+
+      <!-- PASO 3 -->
+      <p style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;">Paso 3 de 3 — Primer presupuesto</p>
+      <div class="device">
+        <div class="device-body">
+          <div style="display:flex;gap:6px;margin-bottom:16px;">
+            <div class="ob-step-num done">✓</div>
+            <div class="ob-step-num done">✓</div>
+            <div class="ob-step-num active">3</div>
+            <div style="flex:1;display:flex;align-items:center;"><div style="flex:1;height:1px;background:var(--border2);"></div></div>
+          </div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:4px;">Configurá tu presupuesto</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Basado en tu ingreso de $280.000, te sugerimos estos límites. Podés ajustarlos.</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;">🍔</span>
+              <span style="flex:1;font-size:12px;color:var(--text2);">Comida</span>
+              <div class="input-mock" style="width:90px;text-align:right;font-size:13px;color:var(--text);">$84.000</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;">🚗</span>
+              <span style="flex:1;font-size:12px;color:var(--text2);">Transporte</span>
+              <div class="input-mock" style="width:90px;text-align:right;font-size:13px;color:var(--text);">$42.000</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;">🏠</span>
+              <span style="flex:1;font-size:12px;color:var(--text2);">Hogar</span>
+              <div class="input-mock" style="width:90px;text-align:right;font-size:13px;color:var(--text);">$56.000</div>
+            </div>
+          </div>
+          <div class="callout gold" style="font-size:11px;margin-bottom:10px;">💡 Sugerencia: destinar el 30% ($84.000) de tus ingresos a Comida es un punto de partida saludable.</div>
+          <button class="mm-btn primary">¡Listo! Empezar a usar My Money 🚀</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes-panel">
+      <h3>Notas de implementación</h3>
+      <div class="note-item">Detectar primer uso: <code style="font-family:monospace;font-size:11px">entries.length === 0 && !localStorage.getItem('mm-ob-done-{uid}')</code></div>
+      <div class="note-item">Modal de 3 pasos con índice de paso <code style="font-family:monospace;font-size:11px">let obStep = 1</code> y funciones <code style="font-family:monospace;font-size:11px">obNext()</code> / <code style="font-family:monospace;font-size:11px">obPrev()</code></div>
+      <div class="note-item">Paso 1: guardar el ingreso como primer entry de tipo 'ingreso' en el mes actual</div>
+      <div class="note-item">Paso 2: guardar el objetivo en localStorage para personalizar insights futuros</div>
+      <div class="note-item">Paso 3: pre-cargar budgets con porcentajes sugeridos basados en el ingreso ingresado (30% comida, 15% transporte, 20% hogar, etc.)</div>
+      <div class="note-item">Al finalizar o saltear: guardar flag <code style="font-family:monospace;font-size:11px">mm-ob-done-{uid}</code> = true</div>
+      <div class="note-item">Los porcentajes sugeridos son configurables — se pueden ajustar según el objetivo del Paso 2</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end sections-wrap -->
+
+<div style="text-align:center;padding:28px;border-top:1px solid var(--border);color:var(--text3);font-size:12px;">
+  Mockups para <strong style="color:var(--accent)">My Money</strong> · Sesiones 3 y 4 · Junio 2026
+</div>
+
+</body>
+</html>

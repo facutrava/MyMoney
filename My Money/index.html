@@ -290,7 +290,8 @@ textarea { resize: vertical; min-height: 56px; }
 .weekly-val { font-size: 15px; font-weight: 600; color: var(--text); }
 .weekly-sub { font-size: 11px; color: var(--text3); }
 
-.cat-progress-item { margin-bottom: 12px; }
+.cat-progress-item { margin-bottom: 12px; cursor: pointer; border-radius: 6px; padding: 6px; margin-left: -6px; margin-right: -6px; transition: background 0.15s; }
+.cat-progress-item:hover { background: var(--surface2); }
 .cat-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .cat-progress-name { font-size: 12px; color: var(--text2); font-weight: 500; }
 .cat-progress-info { font-size: 12px; color: var(--text3); }
@@ -838,7 +839,17 @@ textarea { resize: vertical; min-height: 56px; }
 
 /* User info in header */
 #user-info { display: none; align-items: center; gap: 8px; }
-#user-email { font-size: 12px; color: var(--text2); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent-light); border: 1px solid rgba(201,168,76,0.3);
+  color: var(--accent); font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s; font-family: 'DM Sans', sans-serif;
+  flex-shrink: 0;
+}
+.user-avatar:hover { background: var(--accent); color: #000; }
+#user-display-name { font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; white-space: nowrap; }
+#user-display-name:hover { color: var(--text); }
 .btn-signout {
   font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
   background: transparent; border: 1px solid var(--border2); border-radius: var(--radius);
@@ -1079,7 +1090,8 @@ textarea { resize: vertical; min-height: 56px; }
       <select class="month-select" id="month-filter" onchange="updateAll()"></select>
       <button class="btn-theme" id="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
       <div id="user-info">
-        <span id="user-email" onclick="openProfileModal()" style="cursor:pointer;text-decoration:underline dotted;" title="Ver perfil"></span>
+        <button class="user-avatar" id="user-avatar" onclick="openProfileModal()" title="Ver perfil"></button>
+        <span id="user-display-name" onclick="openProfileModal()" title="Ver perfil"></span>
         <button class="btn-signout" onclick="openBudgetModal()" title="Configurar presupuesto">⚙</button>
         <button class="btn-signout" onclick="signOut()">Salir</button>
       </div>
@@ -1567,10 +1579,20 @@ async function loadEntries() {
   } catch(e) { showToast('Error al cargar datos', 'error'); }
 }
 
+function updateUserDisplay() {
+  const nombre   = currentProfile?.nombre?.trim();
+  const firstName = nombre ? nombre.split(' ')[0] : (currentUser?.email?.split('@')[0] || '?');
+  const initial   = firstName[0].toUpperCase();
+  const avatarEl  = document.getElementById('user-avatar');
+  const nameEl    = document.getElementById('user-display-name');
+  if (avatarEl) avatarEl.textContent = initial;
+  if (nameEl)   nameEl.textContent   = firstName;
+}
+
 function showApp(user) {
   document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('user-email').textContent = user.email;
   document.getElementById('user-info').style.display = 'flex';
+  updateUserDisplay();
 }
 function showAuthScreen() {
   entries = [];
@@ -1578,7 +1600,6 @@ function showAuthScreen() {
   goals   = [];
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('user-info').style.display = 'none';
-  document.getElementById('user-email').textContent = '';
 }
 
 /* Auth UI */
@@ -1643,6 +1664,7 @@ async function loadProfile(user) {
       currentProfile = profile;
     }
   } catch(e) { currentProfile = { nombre: '', apellido: '', telefono: '' }; }
+  updateUserDisplay();
 }
 
 function openProfileModal() {
@@ -1664,8 +1686,9 @@ async function saveProfile() {
   try {
     await dbFetch('PATCH', `profiles?id=eq.${currentUser.id}`, { nombre, apellido, telefono, updated_at: new Date().toISOString() });
     currentProfile = { ...currentProfile, nombre, apellido, telefono };
+    updateUserDisplay();
     closeProfileModal();
-    showToast('Perfil actualizado', 'success');
+    showToast('Perfil actualizado ✓', 'success');
   } catch(e) { showToast('Error al guardar perfil', 'error'); }
 }
 let currentType = 'gasto';
@@ -1874,6 +1897,36 @@ function getCatData(entry) {
   };
 }
 
+function goToCat(cat, type, subcat) {
+  // Limpiar búsqueda y fechas
+  const searchEl = document.getElementById('hf-search');
+  if (searchEl) searchEl.value = '';
+  const fromEl = document.getElementById('hf-date-from');
+  const toEl   = document.getElementById('hf-date-to');
+  if (fromEl) fromEl.value = '';
+  if (toEl)   toEl.value   = '';
+  const clearBtn = document.getElementById('clear-date-btn');
+  if (clearBtn) clearBtn.style.display = 'none';
+  // Forma de pago: todas
+  const payEl = document.getElementById('hf-payment');
+  if (payEl) payEl.value = 'all';
+  // Setear tipo y repopular categorías
+  const typeEl = document.getElementById('hf-type');
+  if (typeEl) typeEl.value = type;
+  onTypeFilterChange();
+  // Setear categoría y repopular subcategorías
+  const catSel = document.getElementById('hf-cat');
+  if (catSel && cat) catSel.value = cat;
+  onCatFilterChange();
+  // Setear subcategoría si se proveyó
+  if (subcat) {
+    const subcatSel = document.getElementById('hf-subcat');
+    if (subcatSel) { subcatSel.value = subcat; subcatSel.style.display = ''; }
+  }
+  showTab('historial');
+  renderHistory();
+}
+
 function onTypeFilterChange() {
   const type   = document.getElementById('hf-type').value;
   const catSel = document.getElementById('hf-cat');
@@ -1882,6 +1935,8 @@ function onTypeFilterChange() {
     opts += Object.keys(GASTO_CATS).map(c => `<option value="${c}">${GASTO_CATS[c].icon} ${c}</option>`).join('');
   } else if (type === 'ingreso') {
     opts += Object.keys(INGRESO_CATS).map(c => `<option value="${c}">${INGRESO_CATS[c].icon} ${c}</option>`).join('');
+  } else if (type === 'inversion') {
+    opts += `<option value="Inversiones">📈 Inversiones</option>`;
   } else {
     opts += '<optgroup label="Gastos">' + Object.keys(GASTO_CATS).map(c => `<option value="${c}">${GASTO_CATS[c].icon} ${c}</option>`).join('') + '</optgroup>';
     opts += '<optgroup label="Ingresos">' + Object.keys(INGRESO_CATS).map(c => `<option value="${c}">${INGRESO_CATS[c].icon} ${c}</option>`).join('') + '</optgroup>';
@@ -2056,7 +2111,7 @@ function renderCatProgress() {
       const color = CAT_COLORS[cat] || '#8E8E93';
       const icon  = INGRESO_CATS[cat]?.icon || '📈';
       const pct   = Math.round((amount / total) * 100);
-      return `<div class="cat-progress-item">
+      return `<div class="cat-progress-item" onclick="goToCat('${cat}','ingreso')" title="Ver en historial">
         <div class="cat-progress-header">
           <span class="cat-progress-name">${icon} ${cat}</span>
           <span class="cat-progress-info">${fmt(amount)} · ${pct}%</span>
@@ -2081,7 +2136,7 @@ function renderCatProgress() {
       const over     = amount > budget;
       const barColor = over ? 'var(--red)' : (pct >= 80 ? '#E8A020' : color);
       const info     = `${fmt(amount)} / ${fmt(budget)}${over ? ' ⚠' : ' · ' + pct + '%'}`;
-      return `<div class="cat-progress-item">
+      return `<div class="cat-progress-item" onclick="goToCat('${cat}','gasto')" title="Ver en historial">
         <div class="cat-progress-header">
           <span class="cat-progress-name">${icon} ${cat}</span>
           <span class="cat-progress-info" style="${over ? 'color:var(--red)' : ''}">${info}</span>
@@ -2090,7 +2145,7 @@ function renderCatProgress() {
       </div>`;
     }
     const pct = Math.round((amount / total) * 100);
-    return `<div class="cat-progress-item">
+    return `<div class="cat-progress-item" onclick="goToCat('${cat}','gasto')" title="Ver en historial">
       <div class="cat-progress-header">
         <span class="cat-progress-name">${icon} ${cat}</span>
         <span class="cat-progress-info">${fmt(amount)} · ${pct}%</span>
@@ -2653,7 +2708,7 @@ function renderInvProgress(mes) {
   el.innerHTML = Object.entries(bySub).sort((a,b) => b[1]-a[1]).map(([sub, amount]) => {
     const color = INV_COLORS[sub] || '#8E8E93';
     const pct   = Math.round((amount / total) * 100);
-    return `<div class="cat-progress-item">
+    return `<div class="cat-progress-item" onclick="goToCat('Inversiones','inversion','${sub}')" title="Ver en historial">
       <div class="cat-progress-header">
         <span class="cat-progress-name" style="color:${color}">${sub}</span>
         <span class="cat-progress-info">${fmt(amount)} · ${pct}%</span>
@@ -3438,7 +3493,19 @@ async function exportPDF(mode) {
     const totalGastosAll = gastosAll.reduce((s,e) => s + e.amount, 0);
     const mesLabel = document.getElementById('month-select')?.options[document.getElementById('month-select')?.selectedIndex]?.text || selectedMonth();
 
-    container.innerHTML = buildPdfMes(mesLabel, totalIngresos, totalGastos, totalPlazo, totalInvertido, balance, sortedCats, totalGastosAll, mes.length);
+    // Capturar el donut chart como imagen
+    let chartImg = '';
+    try {
+      const prevChartType = chartType;
+      chartType = 'gasto';
+      renderCatChart(mes);
+      await new Promise(r => setTimeout(r, 300));
+      const chartCanvas = document.getElementById('chart-cat');
+      if (chartCanvas) chartImg = chartCanvas.toDataURL('image/png');
+      chartType = prevChartType;
+    } catch(e) { chartImg = ''; }
+
+    container.innerHTML = buildPdfMes(mesLabel, totalIngresos, totalGastos, totalPlazo, totalInvertido, balance, sortedCats, totalGastosAll, mes.length, chartImg);
   } else {
     const year = selectedMonth().slice(0,4);
     const yearEntries = entries.filter(e => e.date.startsWith(year));
@@ -3484,15 +3551,30 @@ async function exportPDF(mode) {
   container.innerHTML = '';
 }
 
-function buildPdfMes(mesLabel, ing, gas, plazo, inv, bal, cats, totalGas, count) {
+function buildPdfMes(mesLabel, ing, gas, plazo, inv, bal, cats, totalGas, count, chartImg) {
   const fmtN = n => '$' + Math.round(n).toLocaleString('es-AR');
   const balColor = bal >= 0 ? '#4CAF50' : '#EF5350';
+  const CAT_COLORS_PDF = {'Comida':'#FF9F0A','Transporte':'#5AC8FA','Salud':'#FF6B6B','Entretenimiento':'#BF5AF2','Deporte':'#34C759','Hogar':'#FFD60A','Mascotas':'#FF8C00','Educación':'#30D5C8','Deudas':'#FF453A','Inversiones':'#C9A84C','Otros':'#8E8E93'};
   const catsRows = cats.map(([cat, amt]) => {
     const pct = totalGas > 0 ? Math.round(amt/totalGas*100) : 0;
     const w = Math.min(pct, 100);
-    const color = {'Comida':'#FF9F0A','Transporte':'#5AC8FA','Salud':'#FF6B6B','Entretenimiento':'#BF5AF2','Deporte':'#34C759','Hogar':'#FFD60A','Mascotas':'#FF8C00','Educación':'#30D5C8','Deudas':'#FF453A','Inversiones':'#C9A84C','Otros':'#8E8E93'}[cat] || '#8E8E93';
-    return `<tr><td style="padding:6px 0;font-size:12px;color:#333;">${cat}</td><td style="padding:6px 8px;"><div style="width:100%;height:6px;background:#eee;border-radius:3px;"><div style="width:${w}%;height:100%;background:${color};border-radius:3px;"></div></div></td><td style="padding:6px 0;font-size:12px;font-weight:600;text-align:right;color:#111;">${fmtN(amt)}</td><td style="padding:6px 0 6px 8px;font-size:11px;color:#999;">${pct}%</td></tr>`;
+    const color = CAT_COLORS_PDF[cat] || '#8E8E93';
+    return `<tr><td style="padding:5px 0;font-size:11px;color:#333;">${cat}</td><td style="padding:5px 8px;width:120px;"><div style="width:100%;height:5px;background:#eee;border-radius:3px;"><div style="width:${w}%;height:100%;background:${color};border-radius:3px;"></div></div></td><td style="padding:5px 0;font-size:11px;font-weight:600;text-align:right;color:#111;">${fmtN(amt)}</td><td style="padding:5px 0 5px 6px;font-size:10px;color:#999;">${pct}%</td></tr>`;
   }).join('');
+  // Leyenda del donut para el PDF
+  const legendItems = cats.map(([cat, amt]) => {
+    const pct = totalGas > 0 ? Math.round(amt/totalGas*100) : 0;
+    const color = CAT_COLORS_PDF[cat] || '#8E8E93';
+    return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;font-size:10px;color:#555;">
+      <div style="width:8px;height:8px;border-radius:2px;background:${color};flex-shrink:0;"></div>
+      <span style="flex:1;">${cat}</span><span style="color:#999;">${pct}%</span>
+    </div>`;
+  }).join('');
+  const donutSection = chartImg ? `
+    <div style="display:flex;gap:20px;align-items:center;margin-bottom:20px;padding:16px;background:#f8f8f8;border-radius:10px;">
+      <img src="${chartImg}" style="width:180px;height:180px;flex-shrink:0;" />
+      <div style="flex:1;">${legendItems}</div>
+    </div>` : '';
   return `<div style="font-family:'DM Sans',sans-serif;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #eee;">
       <div><div style="font-size:22px;font-weight:800;">My<span style="color:#C9A84C;">Money</span></div><div style="font-size:12px;color:#999;margin-top:3px;">Resumen mensual — ${mesLabel}</div></div>
@@ -3504,6 +3586,7 @@ function buildPdfMes(mesLabel, ing, gas, plazo, inv, bal, cats, totalGas, count)
       <div style="background:#f8f8f8;border-radius:8px;padding:12px;"><div style="font-size:9px;color:#999;text-transform:uppercase;font-weight:600;letter-spacing:.05em;margin-bottom:4px;">A plazo 💳</div><div style="font-size:18px;font-weight:700;color:#5AC8FA;">${fmtN(plazo)}</div></div>
       <div style="background:#f8f8f8;border-radius:8px;padding:12px;"><div style="font-size:9px;color:#999;text-transform:uppercase;font-weight:600;letter-spacing:.05em;margin-bottom:4px;">Invertido</div><div style="font-size:18px;font-weight:700;color:#32D74B;">${fmtN(inv)}</div></div>
     </div>
+    ${donutSection}
     <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Gastos por categoría (${count} movimientos)</div>
     <table style="width:100%;border-collapse:collapse;">${catsRows}</table>
     <div style="margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:9px;color:#ccc;text-align:center;">Generado con My Money · mymoneyyy.netlify.app</div>

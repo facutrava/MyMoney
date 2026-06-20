@@ -1,0 +1,19 @@
+{
+  "name": "My Money",
+  "short_name": "MyMoney",
+  "description": "Control de finanzas personales",
+  "theme_color": "#0D0D0D",
+  "background_color": "#0D0D0D",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/MyMoney_Logo_transparente_11.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

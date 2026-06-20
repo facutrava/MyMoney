@@ -410,8 +410,10 @@ textarea { resize: vertical; min-height: 56px; }
 }
 
 /* Filter bar */
-.filter-bar { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
-.filter-bar select { font-size: 13px; }
+.filter-bar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.filter-row select { flex: 1; min-width: 0; font-size: 13px; }
+.filter-row input[type="text"] { flex: 1; min-width: 100px; font-size: 13px; }
 
 .view-toggle { display: flex; gap: 4px; margin-left: auto; }
 .vtbtn {
@@ -598,6 +600,17 @@ textarea { resize: vertical; min-height: 56px; }
   </div>
 </div>
 
+<div id="confirm-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeConfirm(false)">
+  <div class="modal-box" style="max-width:340px;gap:16px;">
+    <div class="modal-title" id="confirm-title">Confirmar acción</div>
+    <p id="confirm-msg" style="font-size:14px;color:var(--text2);margin:0;line-height:1.5;"></p>
+    <div class="modal-actions" style="justify-content:flex-end;gap:10px;">
+      <button class="btn btn-ghost" onclick="closeConfirm(false)" style="border:1px solid var(--border2);padding:8px 18px;">Cancelar</button>
+      <button class="btn btn-primary" id="confirm-ok-btn" onclick="closeConfirm(true)" style="padding:8px 18px;">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <header class="app-header">
   <div class="header-inner">
     <h1 class="app-title"><span class="title-my">My</span> <span class="title-money">Money</span></h1>
@@ -624,6 +637,11 @@ textarea { resize: vertical; min-height: 56px; }
       <div class="metric-label">Gastos</div>
       <div class="metric-val expense" id="m-gastos">$0</div>
       <div class="metric-delta" id="m-gastos-delta"></div>
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);">
+        <div class="metric-label" style="margin-bottom:3px;">A plazo 💳</div>
+        <div class="metric-val" id="m-plazo" style="font-size:17px;color:#5AC8FA;">$0</div>
+        <div class="metric-delta" id="m-plazo-delta"></div>
+      </div>
     </div>
     <div class="metric-card">
       <div class="metric-label">Balance</div>
@@ -708,39 +726,43 @@ textarea { resize: vertical; min-height: 56px; }
   <!-- HISTORIAL -->
   <div class="section" id="tab-historial">
     <div class="filter-bar">
-      <select id="hf-type" onchange="onTypeFilterChange()" style="font-size:13px;">
-        <option value="all">Todos</option>
-        <option value="gasto">Gastos</option>
-        <option value="ingreso">Ingresos</option>
-        <option value="inversion">Inversiones</option>
-      </select>
-      <select id="hf-cat" onchange="onCatFilterChange()" style="font-size:13px;">
-        <option value="all">Todas las categorías</option>
-      </select>
-      <select id="hf-subcat" onchange="renderHistory()" style="font-size:13px;display:none;">
-        <option value="all">Todas las subcategorías</option>
-      </select>
-      <select id="hf-payment" onchange="renderHistory()" style="font-size:13px;">
-        <option value="all">Todas las formas de pago</option>
-        <option value="Efectivo">Efectivo</option>
-        <option value="Débito">Débito</option>
-        <option value="Crédito">Crédito</option>
-        <option value="Transferencia">Transferencia</option>
-        <option value="Mercado Pago">Mercado Pago</option>
-        <option value="USD">USD</option>
-      </select>
-      <input type="text" id="hf-search" placeholder="Buscar..." oninput="renderHistory()" style="font-size:13px;width:130px;" />
-      <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">Del</span>
-        <input type="date" id="hf-date-from" onchange="onDateFilterChange()" style="font-size:12px;padding:5px 8px;width:128px;" />
-        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">al</span>
-        <input type="date" id="hf-date-to" onchange="onDateFilterChange()" style="font-size:12px;padding:5px 8px;width:128px;" />
-        <button class="btn btn-ghost" onclick="clearDateFilter()" id="clear-date-btn" style="display:none;font-size:13px;padding:5px 9px;border:1px solid var(--border2);" title="Limpiar rango">✕</button>
+      <!-- Fila 1: selects en una línea -->
+      <div class="filter-row">
+        <select id="hf-type" onchange="onTypeFilterChange()">
+          <option value="all">Todos</option>
+          <option value="gasto">Gastos</option>
+          <option value="ingreso">Ingresos</option>
+          <option value="inversion">Inversiones</option>
+        </select>
+        <select id="hf-cat" onchange="onCatFilterChange()">
+          <option value="all">Todas las categorías</option>
+        </select>
+        <select id="hf-subcat" onchange="renderHistory()" style="display:none;">
+          <option value="all">Todas las subcategorías</option>
+        </select>
+        <select id="hf-payment" onchange="renderHistory()">
+          <option value="all">Todas las formas de pago</option>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Débito">Débito</option>
+          <option value="Crédito">Crédito</option>
+          <option value="Transferencia">Transferencia</option>
+          <option value="Mercado Pago">Mercado Pago</option>
+          <option value="USD">USD</option>
+        </select>
       </div>
-      <button class="btn btn-ghost" onclick="exportCSV()" style="font-size:13px;padding:6px 12px;border:1px solid var(--border2);color:var(--text2);">↓ CSV</button>
-      <div class="view-toggle">
-        <button class="vtbtn active" id="vb-day"   onclick="setView('day')">Día</button>
-        <button class="vtbtn"        id="vb-month" onclick="setView('month')">Mes</button>
+      <!-- Fila 2: búsqueda, fechas, CSV, vista -->
+      <div class="filter-row">
+        <input type="text" id="hf-search" placeholder="Buscar..." oninput="renderHistory()" />
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">Del</span>
+        <input type="date" id="hf-date-from" onchange="onDateFilterChange()" style="font-size:12px;padding:5px 8px;flex:none;width:130px;" />
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">al</span>
+        <input type="date" id="hf-date-to" onchange="onDateFilterChange()" style="font-size:12px;padding:5px 8px;flex:none;width:130px;" />
+        <button class="btn btn-ghost" onclick="clearDateFilter()" id="clear-date-btn" style="display:none;font-size:13px;padding:5px 9px;border:1px solid var(--border2);" title="Limpiar rango">✕</button>
+        <button class="btn btn-ghost" onclick="exportCSV()" style="font-size:13px;padding:6px 12px;border:1px solid var(--border2);color:var(--text2);flex:none;">↓ CSV</button>
+        <div class="view-toggle" style="flex:none;">
+          <button class="vtbtn active" id="vb-day"   onclick="setView('day')">Día</button>
+          <button class="vtbtn"        id="vb-month" onclick="setView('month')">Mes</button>
+        </div>
       </div>
     </div>
     <div class="card" id="history-container"><div class="empty">Sin movimientos registrados</div></div>
@@ -753,8 +775,9 @@ textarea { resize: vertical; min-height: 56px; }
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <h2 class="card-title" style="margin:0;">Por categoría</h2>
         <div class="view-toggle">
-          <button class="vtbtn active" id="gc-gasto"   onclick="setChartType('gasto')">Gastos</button>
-          <button class="vtbtn"        id="gc-ingreso" onclick="setChartType('ingreso')">Ingresos</button>
+          <button class="vtbtn active" id="gc-gasto"     onclick="setChartType('gasto')">Gastos</button>
+          <button class="vtbtn"        id="gc-ingreso"   onclick="setChartType('ingreso')">Ingresos</button>
+          <button class="vtbtn"        id="gc-inversion" onclick="setChartType('inversion')">Inversiones</button>
         </div>
       </div>
       <div id="chart-cat-wrapper" style="position:relative;width:100%;height:260px;">
@@ -777,6 +800,7 @@ textarea { resize: vertical; min-height: 56px; }
       <h3 id="cat-progress-title" style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:14px;">Gastos por categoría</h3>
       <div id="cat-progress-list"></div>
     </div>
+
   </div>
 
   <!-- METAS -->
@@ -829,6 +853,16 @@ const INGRESO_CATS = {
 };
 
 /* Color por categoría — usado en íconos del historial y en el gráfico donut */
+const INV_COLORS = {
+  'FCI':        '#C9A84C',
+  'Plazo fijo': '#32D74B',
+  'ON':         '#5AC8FA',
+  'ETF':        '#BF5AF2',
+  'Cripto':     '#FF9F0A',
+  'CDRs':       '#0A84FF',
+  'Acciones':   '#FF6B6B',
+};
+
 const CAT_COLORS = {
   'Comida':          '#FF9F0A',
   'Transporte':      '#5AC8FA',
@@ -1021,18 +1055,21 @@ async function saveProfile() {
 }
 let currentType = 'gasto';
 let view = 'day';
-let catChart = null, trendChart = null;
+let catChart = null, trendChart = null, invChart = null, invTrendChart = null;
 let chartType = 'gasto';
 let trendPeriod = 'mensual';
+let invTrendPeriod = 'mensual';
 let budgets = {};
 let goals   = [];
 
 function setChartType(t) {
   chartType = t;
-  document.getElementById('gc-gasto').classList.toggle('active', t === 'gasto');
-  document.getElementById('gc-ingreso').classList.toggle('active', t === 'ingreso');
+  document.getElementById('gc-gasto').classList.toggle('active',     t === 'gasto');
+  document.getElementById('gc-ingreso').classList.toggle('active',   t === 'ingreso');
+  document.getElementById('gc-inversion').classList.toggle('active', t === 'inversion');
+  const titles = { gasto: 'Gastos por categoría', ingreso: 'Ingresos por categoría', inversion: 'Inversiones por subcategoría' };
   const titleEl = document.getElementById('cat-progress-title');
-  if (titleEl) titleEl.textContent = t === 'gasto' ? 'Gastos por categoría' : 'Ingresos por categoría';
+  if (titleEl) titleEl.textContent = titles[t] || '';
   renderCharts();
 }
 
@@ -1125,43 +1162,48 @@ function setDelta(id, cur, pre, invertColors) {
 
 function updateMetrics() {
   const mes = monthEntries();
-  const totalIngresos  = mes.filter(e => e.type === 'ingreso' || e.type === 'inversion').reduce((s,e) => s + e.amount, 0);
-  const gastosAll      = mes.filter(e => (e.type||'gasto') === 'gasto');
-  const totalGastos    = gastosAll.reduce((s,e) => s + e.amount, 0);
-  const totalInvertido = gastosAll.filter(e => e.category === 'Inversiones').reduce((s,e) => s + e.amount, 0);
-  const balance        = totalIngresos - totalGastos;
+  const totalIngresos   = mes.filter(e => e.type === 'ingreso').reduce((s,e) => s + e.amount, 0);
+  const gastosAll       = mes.filter(e => (e.type||'gasto') === 'gasto');
+  const totalGastoPlazo = gastosAll.filter(e => e.paymentMethod === 'Crédito').reduce((s,e) => s + e.amount, 0);
+  const totalGastos     = gastosAll.filter(e => e.paymentMethod !== 'Crédito').reduce((s,e) => s + e.amount, 0);
+  const totalInvertido  = mes.filter(e => e.type === 'inversion').reduce((s,e) => s + e.amount, 0);
+  const balance         = totalIngresos - totalGastos - totalInvertido;
 
   const balEl = document.getElementById('m-balance');
   balEl.className = 'metric-val ' + (balance >= 0 ? 'ok' : 'over');
 
-  animateNumber(document.getElementById('m-ingresos'),  totalIngresos,  v => fmt(v));
-  animateNumber(document.getElementById('m-gastos'),    totalGastos,    v => fmt(v));
-  animateNumber(document.getElementById('m-invertido'), totalInvertido, v => fmt(v));
+  animateNumber(document.getElementById('m-ingresos'),  totalIngresos,   v => fmt(v));
+  animateNumber(document.getElementById('m-gastos'),    totalGastos,     v => fmt(v));
+  animateNumber(document.getElementById('m-plazo'),     totalGastoPlazo, v => fmt(v));
+  animateNumber(document.getElementById('m-invertido'), totalInvertido,  v => fmt(v));
   animateNumber(balEl, Math.abs(balance), v => (balance >= 0 ? '+' : '-') + fmt(v));
 
   // Tendencia vs mes anterior
   const prevKey        = prevMonthKey(selectedMonth());
   const prev           = entries.filter(e => monthKey(e.date) === prevKey);
-  const prevIng        = prev.filter(e => e.type === 'ingreso' || e.type === 'inversion').reduce((s,e) => s + e.amount, 0);
-  const prevGast       = prev.filter(e => (e.type||'gasto') === 'gasto').reduce((s,e) => s + e.amount, 0);
-  const prevInvertido  = prev.filter(e => (e.type||'gasto') === 'gasto' && e.category === 'Inversiones').reduce((s,e) => s + e.amount, 0);
-  const prevBal        = prevIng - prevGast;
+  const prevIng        = prev.filter(e => e.type === 'ingreso').reduce((s,e) => s + e.amount, 0);
+  const prevGastAll    = prev.filter(e => (e.type||'gasto') === 'gasto');
+  const prevGastPlazo  = prevGastAll.filter(e => e.paymentMethod === 'Crédito').reduce((s,e) => s + e.amount, 0);
+  const prevGast       = prevGastAll.filter(e => e.paymentMethod !== 'Crédito').reduce((s,e) => s + e.amount, 0);
+  const prevInvertido  = prev.filter(e => e.type === 'inversion').reduce((s,e) => s + e.amount, 0);
+  const prevBal        = prevIng - prevGast - prevInvertido;
 
-  setDelta('m-ingresos-delta',  totalIngresos,  prevIng,       false);
-  setDelta('m-gastos-delta',    totalGastos,    prevGast,      true);
-  setDelta('m-invertido-delta', totalInvertido, prevInvertido, false);
-  setDelta('m-balance-delta',   balance,        prevBal,       false);
+  setDelta('m-ingresos-delta',  totalIngresos,   prevIng,       false);
+  setDelta('m-gastos-delta',    totalGastos,     prevGast,      true);
+  setDelta('m-plazo-delta',     totalGastoPlazo, prevGastPlazo, true);
+  setDelta('m-invertido-delta', totalInvertido,  prevInvertido, false);
+  setDelta('m-balance-delta',   balance,         prevBal,       false);
 
   // Barra de presupuesto consumido
-  const barWrap    = document.getElementById('spending-bar-wrap');
-  const fill       = document.getElementById('spending-bar-fill');
-  const pctEl      = document.getElementById('spending-pct');
-  const labelEl    = document.getElementById('spending-bar-text');
+  const barWrap     = document.getElementById('spending-bar-wrap');
+  const fill        = document.getElementById('spending-bar-fill');
+  const pctEl       = document.getElementById('spending-pct');
+  const labelEl     = document.getElementById('spending-bar-text');
   const totalBudget = Object.values(budgets).reduce((s,v) => s + v, 0);
   const denominator = totalBudget > 0 ? totalBudget : totalIngresos;
   if (denominator > 0) {
     barWrap.style.display = '';
-    const pctNum = Math.round(totalGastos / denominator * 100);
+    const pctNum = Math.round((totalGastos + totalGastoPlazo) / denominator * 100);
     fill.style.width      = Math.min(pctNum, 100) + '%';
     fill.style.background = pctNum >= 100 ? 'var(--red)' : pctNum >= 80 ? '#E8A020' : 'var(--green)';
     pctEl.textContent     = pctNum + '%';
@@ -1319,11 +1361,11 @@ function renderHistory() {
       byCat[k].total += e.amount; byCat[k].items.push(e);
     });
     Object.values(byCat).sort((a,b) => b.total - a.total).forEach(g => {
-      const cats = g.type === 'gasto' ? GASTO_CATS : (g.type === 'inversion' ? GASTO_CATS : INGRESO_CATS);
+      const cats = (g.type === 'gasto' || g.type === 'inversion') ? GASTO_CATS : INGRESO_CATS;
       const icon = cats[g.cat]?.icon || '📦';
-      const isPos = g.type === 'ingreso' || g.type === 'inversion';
-      const prefix = isPos ? '+' : '-';
-      const color  = isPos ? '#4CAF50' : '#EF5350';
+      const isInversionGroup = g.type === 'inversion';
+      const prefix = g.type === 'ingreso' ? '+' : '-';
+      const color  = isInversionGroup ? 'var(--accent)' : (g.type === 'ingreso' ? '#4CAF50' : '#EF5350');
       html += `<div class="day-label">${icon} ${g.cat} — <span style="color:${color}">${prefix}${fmt(g.total)}</span></div>`;
       g.items.forEach(e => { html += rowHTML(e); });
     });
@@ -1331,11 +1373,13 @@ function renderHistory() {
   container.innerHTML = html;
 
   if (footer) {
-    const totalGastos   = list.filter(e => (e.type||'gasto') === 'gasto').reduce((s,e) => s + e.amount, 0);
-    const totalIngresos = list.filter(e => e.type === 'ingreso' || e.type === 'inversion').reduce((s,e) => s + e.amount, 0);
+    const totalGastos    = list.filter(e => (e.type||'gasto') === 'gasto').reduce((s,e) => s + e.amount, 0);
+    const totalIngresos  = list.filter(e => e.type === 'ingreso').reduce((s,e) => s + e.amount, 0);
+    const totalInvertido = list.filter(e => e.type === 'inversion').reduce((s,e) => s + e.amount, 0);
     const parts = [`<span>${list.length} movimiento${list.length !== 1 ? 's' : ''}</span>`];
-    if (totalGastos   > 0) parts.push(`Gastos: <span class="hf-val" style="color:var(--red)">${fmt(totalGastos)}</span>`);
-    if (totalIngresos > 0) parts.push(`Ingresos: <span class="hf-val" style="color:var(--green)">${fmt(totalIngresos)}</span>`);
+    if (totalGastos    > 0) parts.push(`Gastos: <span class="hf-val" style="color:var(--red)">${fmt(totalGastos)}</span>`);
+    if (totalIngresos  > 0) parts.push(`Ingresos: <span class="hf-val" style="color:var(--green)">${fmt(totalIngresos)}</span>`);
+    if (totalInvertido > 0) parts.push(`Invertido: <span class="hf-val" style="color:var(--accent)">${fmt(totalInvertido)}</span>`);
     footer.innerHTML = parts.join(' · ');
     footer.style.display = 'flex';
   }
@@ -1343,8 +1387,9 @@ function renderHistory() {
 
 function rowHTML(e) {
   const { icon, ibg } = getCatData(e);
-  const isIncome    = e.type === 'ingreso' || e.type === 'inversion';
-  const amountColor = isIncome ? '#4CAF50' : '#EF5350';
+  const isInversion = e.type === 'inversion';
+  const isIncome    = e.type === 'ingreso';
+  const amountColor = isInversion ? 'var(--accent)' : (isIncome ? '#4CAF50' : '#EF5350');
   const prefix      = isIncome ? '+' : '-';
   const subLabel    = e.subcategory || e.category;
   const payment     = e.paymentMethod || '';
@@ -1371,15 +1416,20 @@ function renderCatProgress() {
   if (!el) return;
   const mes = monthEntries();
 
+  if (chartType === 'inversion') {
+    renderInvProgress(mes);
+    return;
+  }
+
   if (chartType === 'ingreso') {
-    const ingresos = mes.filter(e => e.type === 'ingreso' || e.type === 'inversion');
+    const ingresos = mes.filter(e => e.type === 'ingreso');
     const total    = ingresos.reduce((s,e) => s + e.amount, 0);
     if (!total) { el.innerHTML = '<div class="empty">Sin ingresos este mes</div>'; return; }
     const byCat = {};
     ingresos.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + e.amount; });
     el.innerHTML = Object.entries(byCat).sort((a,b) => b[1]-a[1]).map(([cat, amount]) => {
       const color = CAT_COLORS[cat] || '#8E8E93';
-      const icon  = INGRESO_CATS[cat]?.icon || GASTO_CATS[cat]?.icon || '📈';
+      const icon  = INGRESO_CATS[cat]?.icon || '📈';
       const pct   = Math.round((amount / total) * 100);
       return `<div class="cat-progress-item">
         <div class="cat-progress-header">
@@ -1435,6 +1485,25 @@ function loadBudgets() {
 function saveBudgetsLocal() {
   if (!currentUser) return;
   localStorage.setItem('mymoney_budgets_' + currentUser.id, JSON.stringify(budgets));
+}
+
+let _confirmCallback = null;
+
+function showConfirm(message, onConfirm, confirmLabel = 'Confirmar', danger = true) {
+  document.getElementById('confirm-msg').textContent = message;
+  const okBtn = document.getElementById('confirm-ok-btn');
+  okBtn.textContent = confirmLabel;
+  okBtn.style.background    = danger ? 'var(--red)' : 'var(--accent)';
+  okBtn.style.borderColor   = danger ? 'var(--red)' : 'var(--accent)';
+  document.getElementById('confirm-modal').style.display = 'flex';
+  _confirmCallback = onConfirm;
+}
+
+function closeConfirm(confirmed) {
+  document.getElementById('confirm-modal').style.display = 'none';
+  const cb = _confirmCallback;
+  _confirmCallback = null;
+  if (confirmed && cb) cb();
 }
 
 function openBudgetModal() {
@@ -1510,11 +1579,12 @@ function updateGoalCurrent(id) {
 }
 
 function deleteGoal(id) {
-  if (!confirm('¿Eliminar esta meta?')) return;
-  goals = goals.filter(g => g.id !== id);
-  saveGoalsLocal();
-  renderGoals();
-  showToast('Meta eliminada');
+  showConfirm('¿Eliminar esta meta? Esta acción no se puede deshacer.', () => {
+    goals = goals.filter(g => g.id !== id);
+    saveGoalsLocal();
+    renderGoals();
+    showToast('Meta eliminada');
+  }, 'Eliminar');
 }
 
 function renderGoals() {
@@ -1609,6 +1679,28 @@ function renderCharts() {
 }
 
 function renderCatChart(mes) {
+  if (catChart) { catChart.destroy(); catChart = null; }
+  const wrapper = document.getElementById('chart-cat-wrapper');
+
+  if (chartType === 'inversion') {
+    const invEntries = mes.filter(e => e.type === 'inversion');
+    const bySub = {};
+    invEntries.forEach(e => { bySub[e.subcategory || 'Otros'] = (bySub[e.subcategory || 'Otros'] || 0) + e.amount; });
+    const labels = Object.keys(bySub), data = labels.map(l => bySub[l]), colors = labels.map(l => INV_COLORS[l] || '#8E8E93');
+    if (!data.length) { wrapper.innerHTML = '<div class="empty" style="padding:3rem">Sin inversiones este mes</div>'; document.getElementById('cat-legend').innerHTML = ''; return; }
+    wrapper.innerHTML = '<canvas id="chart-cat" role="img" aria-label="Inversiones por subcategoría"></canvas>';
+    const canvas = document.getElementById('chart-cat');
+    canvas.dataset.centerLabel = 'invertido';
+    catChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => { const t = ctx.dataset.data.reduce((a,b)=>a+b,0); return ' ' + ctx.label + ': ' + fmt(ctx.raw) + ' (' + (t>0?Math.round(ctx.raw/t*100):0) + '%)'; }}}}, cutout: '62%' }
+    });
+    const total = data.reduce((s,v)=>s+v,0);
+    document.getElementById('cat-legend').innerHTML = labels.map((l,i) => `<span class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${l} ${Math.round(data[i]/total*100)}%</span>`).join('');
+    return;
+  }
+
   const isGasto  = chartType === 'gasto';
   const filtered = mes.filter(e => (e.type||'gasto') === chartType);
   const cats     = isGasto ? GASTO_CATS : INGRESO_CATS;
@@ -1620,8 +1712,6 @@ function renderCatChart(mes) {
   const labels = [], data = [], colors = [];
   catKeys.forEach(c => { if (byCat[c] > 0) { labels.push(c); data.push(byCat[c]); colors.push(CAT_COLORS[c] || '#8E8E93'); } });
 
-  if (catChart) { catChart.destroy(); catChart = null; }
-  const wrapper = document.getElementById('chart-cat-wrapper');
   const emptyMsg = isGasto ? 'Sin gastos este mes' : 'Sin ingresos este mes';
   if (!data.length) { wrapper.innerHTML = `<div class="empty" style="padding:3rem">${emptyMsg}</div>`; document.getElementById('cat-legend').innerHTML = ''; return; }
   if (!document.getElementById('chart-cat')) {
@@ -1662,21 +1752,23 @@ function setTrendPeriod(p) {
 function renderTrendChart() {
   if (trendChart) { trendChart.destroy(); trendChart = null; }
   const wrapper = document.getElementById('chart-trend-wrapper');
-  let labels, ingData, gasData;
+  let labels, ingData, gasData, invData;
 
   if (trendPeriod === 'mensual') {
     const byM = {};
     entries.forEach(e => {
       const k = monthKey(e.date);
-      if (!byM[k]) byM[k] = { ingreso: 0, gasto: 0 };
-      const bucket = (e.type === 'ingreso' || e.type === 'inversion') ? 'ingreso' : 'gasto';
-      byM[k][bucket] += e.amount;
+      if (!byM[k]) byM[k] = { ingreso: 0, gasto: 0, inversion: 0 };
+      if (e.type === 'ingreso') byM[k].ingreso += e.amount;
+      else if (e.type === 'inversion') byM[k].inversion += e.amount;
+      else if ((e.type||'gasto') === 'gasto') byM[k].gasto += e.amount;
     });
     const months = Object.keys(byM).sort().slice(-6);
     if (!months.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
     labels  = months.map(m => monthLabel(m).slice(0,3) + "'" + m.slice(2,4));
-    ingData = months.map(m => Math.round(byM[m].ingreso || 0));
-    gasData = months.map(m => Math.round(byM[m].gasto   || 0));
+    ingData = months.map(m => Math.round(byM[m].ingreso   || 0));
+    gasData = months.map(m => Math.round(byM[m].gasto     || 0));
+    invData = months.map(m => Math.round(byM[m].inversion || 0));
 
   } else if (trendPeriod === 'semanal') {
     function getWeekStart(dateStr) {
@@ -1689,15 +1781,17 @@ function renderTrendChart() {
     const byW = {};
     entries.forEach(e => {
       const k = getWeekStart(e.date);
-      if (!byW[k]) byW[k] = { ingreso: 0, gasto: 0 };
-      const bucket = (e.type === 'ingreso' || e.type === 'inversion') ? 'ingreso' : 'gasto';
-      byW[k][bucket] += e.amount;
+      if (!byW[k]) byW[k] = { ingreso: 0, gasto: 0, inversion: 0 };
+      if (e.type === 'ingreso') byW[k].ingreso += e.amount;
+      else if (e.type === 'inversion') byW[k].inversion += e.amount;
+      else if ((e.type||'gasto') === 'gasto') byW[k].gasto += e.amount;
     });
     const weeks = Object.keys(byW).sort().slice(-8);
     if (!weeks.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
     labels  = weeks.map(w => new Date(w + 'T12:00:00').toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' }));
-    ingData = weeks.map(w => Math.round(byW[w].ingreso || 0));
-    gasData = weeks.map(w => Math.round(byW[w].gasto   || 0));
+    ingData = weeks.map(w => Math.round(byW[w].ingreso   || 0));
+    gasData = weeks.map(w => Math.round(byW[w].gasto     || 0));
+    invData = weeks.map(w => Math.round(byW[w].inversion || 0));
 
   } else {
     const today = todayAR();
@@ -1706,23 +1800,26 @@ function renderTrendChart() {
     const startDate = from.toISOString().slice(0, 10);
     const byD = {};
     entries.filter(e => e.date >= startDate).forEach(e => {
-      if (!byD[e.date]) byD[e.date] = { ingreso: 0, gasto: 0 };
-      const bucket = (e.type === 'ingreso' || e.type === 'inversion') ? 'ingreso' : 'gasto';
-      byD[e.date][bucket] += e.amount;
+      if (!byD[e.date]) byD[e.date] = { ingreso: 0, gasto: 0, inversion: 0 };
+      if (e.type === 'ingreso') byD[e.date].ingreso += e.amount;
+      else if (e.type === 'inversion') byD[e.date].inversion += e.amount;
+      else if ((e.type||'gasto') === 'gasto') byD[e.date].gasto += e.amount;
     });
     const days = Object.keys(byD).sort();
     if (!days.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos en los últimos 30 días</div>'; return; }
     labels  = days.map(d => new Date(d + 'T12:00:00').toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' }));
-    ingData = days.map(d => Math.round(byD[d].ingreso || 0));
-    gasData = days.map(d => Math.round(byD[d].gasto   || 0));
+    ingData = days.map(d => Math.round(byD[d].ingreso   || 0));
+    gasData = days.map(d => Math.round(byD[d].gasto     || 0));
+    invData = days.map(d => Math.round(byD[d].inversion || 0));
   }
 
   if (!document.getElementById('chart-trend')) {
     wrapper.innerHTML = '<canvas id="chart-trend" role="img" aria-label="Tendencia">Tendencia.</canvas>';
   }
   const trendDatasets = [];
-  if (chartType !== 'ingreso') trendDatasets.push({ label: 'Gastos',   data: gasData, borderColor: '#EF5350', backgroundColor: 'rgba(239,83,80,0.08)', tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#EF5350', borderWidth: 2 });
-  if (chartType !== 'gasto')   trendDatasets.push({ label: 'Ingresos', data: ingData, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.08)',  tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#4CAF50', borderWidth: 2 });
+  if (chartType === 'gasto')     trendDatasets.push({ label: 'Gastos',      data: gasData, borderColor: '#EF5350', backgroundColor: 'rgba(239,83,80,0.08)',  tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#EF5350', borderWidth: 2 });
+  if (chartType === 'ingreso')   trendDatasets.push({ label: 'Ingresos',    data: ingData, borderColor: '#4CAF50', backgroundColor: 'rgba(76,175,80,0.08)',   tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#4CAF50', borderWidth: 2 });
+  if (chartType === 'inversion') trendDatasets.push({ label: 'Invertido',   data: invData, borderColor: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.08)',  tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#C9A84C', borderWidth: 2 });
 
   trendChart = new Chart(document.getElementById('chart-trend'), {
     type: 'line',
@@ -1742,6 +1839,137 @@ function renderTrendChart() {
       }
     }
   });
+}
+
+function setInvTrendPeriod(p) {
+  invTrendPeriod = p;
+  ['mensual','semanal','diaria'].forEach(t => {
+    document.getElementById('itp-' + t)?.classList.toggle('active', t === p);
+  });
+  renderInvTrendChart();
+}
+
+function renderInversionCharts() {
+  const mes = monthEntries();
+  renderInvDonut(mes);
+  renderInvTrendChart();
+  renderInvProgress(mes);
+}
+
+function renderInvDonut(mes) {
+  const invEntries = mes.filter(e => e.type === 'inversion');
+  const wrapper = document.getElementById('chart-inv-wrapper');
+  if (invChart) { invChart.destroy(); invChart = null; }
+  if (!invEntries.length) {
+    wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin inversiones registradas este mes</div>';
+    document.getElementById('inv-legend').innerHTML = '';
+    return;
+  }
+  const bySub = {};
+  invEntries.forEach(e => { bySub[e.subcategory || 'Otros'] = (bySub[e.subcategory || 'Otros'] || 0) + e.amount; });
+  const labels = Object.keys(bySub);
+  const data   = labels.map(l => bySub[l]);
+  const colors = labels.map(l => INV_COLORS[l] || '#8E8E93');
+  wrapper.innerHTML = '<canvas id="chart-inv" role="img" aria-label="Inversiones por subcategoría"></canvas>';
+  const canvas = document.getElementById('chart-inv');
+  canvas.dataset.centerLabel = 'invertido';
+  invChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => {
+          const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+          const pct = total > 0 ? Math.round(ctx.raw / total * 100) : 0;
+          return ' ' + ctx.label + ': ' + fmt(ctx.raw) + ' (' + pct + '%)';
+        }}}
+      },
+      cutout: '62%'
+    }
+  });
+  const total = data.reduce((s,v) => s + v, 0);
+  document.getElementById('inv-legend').innerHTML = labels.map((l,i) =>
+    `<span class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${l} ${Math.round(data[i]/total*100)}%</span>`
+  ).join('');
+}
+
+function renderInvTrendChart() {
+  if (invTrendChart) { invTrendChart.destroy(); invTrendChart = null; }
+  const wrapper = document.getElementById('chart-inv-trend-wrapper');
+  let labels, invData;
+  const invEntries = entries.filter(e => e.type === 'inversion');
+
+  if (invTrendPeriod === 'mensual') {
+    const byM = {};
+    invEntries.forEach(e => { const k = monthKey(e.date); byM[k] = (byM[k] || 0) + e.amount; });
+    const months = Object.keys(byM).sort().slice(-6);
+    if (!months.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
+    labels  = months.map(m => monthLabel(m).slice(0,3) + "'" + m.slice(2,4));
+    invData = months.map(m => Math.round(byM[m] || 0));
+  } else if (invTrendPeriod === 'semanal') {
+    function getWeekStartInv(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      const day = d.getDay() === 0 ? 6 : d.getDay() - 1;
+      const mon = new Date(d); mon.setDate(d.getDate() - day);
+      return mon.toISOString().slice(0, 10);
+    }
+    const byW = {};
+    invEntries.forEach(e => { const k = getWeekStartInv(e.date); byW[k] = (byW[k] || 0) + e.amount; });
+    const weeks = Object.keys(byW).sort().slice(-8);
+    if (!weeks.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos suficientes</div>'; return; }
+    labels  = weeks.map(w => new Date(w + 'T12:00:00').toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' }));
+    invData = weeks.map(w => Math.round(byW[w] || 0));
+  } else {
+    const today = todayAR();
+    const from  = new Date(today + 'T12:00:00');
+    from.setDate(from.getDate() - 29);
+    const startDate = from.toISOString().slice(0, 10);
+    const byD = {};
+    invEntries.filter(e => e.date >= startDate).forEach(e => { byD[e.date] = (byD[e.date] || 0) + e.amount; });
+    const days = Object.keys(byD).sort();
+    if (!days.length) { wrapper.innerHTML = '<div class="empty" style="padding:2rem">Sin datos en los últimos 30 días</div>'; return; }
+    labels  = days.map(d => new Date(d + 'T12:00:00').toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' }));
+    invData = days.map(d => Math.round(byD[d] || 0));
+  }
+
+  wrapper.innerHTML = '<canvas id="chart-inv-trend" role="img" aria-label="Tendencia de inversiones"></canvas>';
+  invTrendChart = new Chart(document.getElementById('chart-inv-trend'), {
+    type: 'line',
+    data: { labels, datasets: [{ label: 'Invertido', data: invData, borderColor: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.08)', tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#C9A84C', borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` Invertido: ${fmt(ctx.parsed.y)}` } }
+      },
+      scales: {
+        x: { ticks: { font:{size:11,family:'DM Sans'}, color:'#6B6B6B' }, grid:{ display:false }, border:{ display:false } },
+        y: { ticks: { font:{size:11,family:'DM Sans'}, color:'#6B6B6B', callback: v => '$' + v.toLocaleString() }, grid:{ color:'rgba(255,255,255,0.04)' }, border:{ display:false } }
+      }
+    }
+  });
+}
+
+function renderInvProgress(mes) {
+  const el = document.getElementById('inv-progress-list');
+  const invEntries = mes.filter(e => e.type === 'inversion');
+  if (!invEntries.length) { el.innerHTML = '<div class="empty">Sin inversiones este mes</div>'; return; }
+  const total = invEntries.reduce((s,e) => s + e.amount, 0);
+  const bySub = {};
+  invEntries.forEach(e => { bySub[e.subcategory || 'Otros'] = (bySub[e.subcategory || 'Otros'] || 0) + e.amount; });
+  el.innerHTML = Object.entries(bySub).sort((a,b) => b[1]-a[1]).map(([sub, amount]) => {
+    const color = INV_COLORS[sub] || '#8E8E93';
+    const pct   = Math.round((amount / total) * 100);
+    return `<div class="cat-progress-item">
+      <div class="cat-progress-header">
+        <span class="cat-progress-name" style="color:${color}">${sub}</span>
+        <span class="cat-progress-info">${fmt(amount)} · ${pct}%</span>
+      </div>
+      <div class="cat-progress-track"><div class="cat-progress-fill" style="width:${pct}%;background:${color};"></div></div>
+    </div>`;
+  }).join('');
 }
 
 async function addEntry() {
@@ -1790,13 +2018,14 @@ async function addEntry() {
   }, 900);
 }
 
-async function delEntry(id) {
-  if (!confirm('Eliminar este movimiento?')) return;
-  try { await dbFetch('DELETE', 'entries?id=eq.' + id); }
-  catch(e) { showToast('Error al eliminar', 'error'); return; }
-  entries = entries.filter(e => e.id !== id);
-  initMonthFilter(); updateAll();
-  showToast('Movimiento eliminado');
+function delEntry(id) {
+  showConfirm('¿Eliminar este movimiento? Esta acción no se puede deshacer.', async () => {
+    try { await dbFetch('DELETE', 'entries?id=eq.' + id); }
+    catch(e) { showToast('Error al eliminar', 'error'); return; }
+    entries = entries.filter(e => e.id !== id);
+    initMonthFilter(); updateAll();
+    showToast('Movimiento eliminado');
+  }, 'Eliminar');
 }
 
 function editEntry(id) {

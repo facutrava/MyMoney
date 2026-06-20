@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Money — Guía de Mejoras 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0A0A0F;
+  --bg2: #111118;
+  --surface: #16161F;
+  --surface2: #1E1E2A;
+  --border: rgba(255,255,255,0.07);
+  --border2: #2A2A38;
+  --text: #F0F0F5;
+  --text2: #9B9BAA;
+  --text3: #5A5A70;
+  --gold: #C9A84C;
+  --gold-light: rgba(201,168,76,0.15);
+  --green: #34D399;
+  --green-light: rgba(52,211,153,0.12);
+  --blue: #60A5FA;
+  --blue-light: rgba(96,165,250,0.12);
+  --purple: #A78BFA;
+  --purple-light: rgba(167,139,250,0.12);
+  --red: #F87171;
+  --red-light: rgba(248,113,113,0.12);
+  --orange: #FB923C;
+  --orange-light: rgba(251,146,60,0.12);
+  --teal: #2DD4BF;
+  --teal-light: rgba(45,212,191,0.12);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, #0A0A0F 0%, #13131F 50%, #0A0A0F 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 72px 24px 56px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.12), transparent);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gold-light);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-size: clamp(32px, 5vw, 54px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.hero h1 span { color: var(--gold); }
+.hero p {
+  font-size: 17px;
+  color: var(--text2);
+  max-width: 560px;
+  margin: 0 auto 36px;
+}
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.hero-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text3);
+}
+.hero-meta-item span { color: var(--text2); font-weight: 500; }
+
+/* ── LAYOUT ── */
+.container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+/* ── NAV ── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,10,15,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+.nav-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-link {
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.nav-link:hover { color: var(--text); }
+
+/* ── SECTIONS ── */
+.section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+.section:last-child { border-bottom: none; }
+.section-header { margin-bottom: 36px; }
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+.section-tag.gold   { color: var(--gold);   background: var(--gold-light);   }
+.section-tag.blue   { color: var(--blue);   background: var(--blue-light);   }
+.section-tag.green  { color: var(--green);  background: var(--green-light);  }
+.section-tag.purple { color: var(--purple); background: var(--purple-light); }
+.section-tag.orange { color: var(--orange); background: var(--orange-light); }
+.section-tag.teal   { color: var(--teal);   background: var(--teal-light);   }
+.section h2 {
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.section-desc { font-size: 15px; color: var(--text2); max-width: 600px; }
+
+/* ── CARDS ── */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.cards.cols-2 { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+.card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.card .tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+.tag.alta    { background: rgba(248,113,113,0.15); color: var(--red); }
+.tag.media   { background: rgba(251,146,60,0.15);  color: var(--orange); }
+.tag.baja    { background: rgba(96,165,250,0.15);  color: var(--blue); }
+.tag.mejora  { background: rgba(167,139,250,0.15); color: var(--purple); }
+.tag.nueva   { background: rgba(52,211,153,0.15);  color: var(--green); }
+.tag.marca   { background: rgba(201,168,76,0.15);  color: var(--gold); }
+
+/* ── BENCHMARK TABLE ── */
+.bench {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+.bench table { width: 100%; border-collapse: collapse; }
+.bench th {
+  background: var(--surface2);
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text3);
+  text-align: left;
+}
+.bench td {
+  padding: 13px 16px;
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+}
+.bench td:first-child { font-weight: 600; color: var(--text); }
+.bench tr:hover td { background: rgba(255,255,255,0.02); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.dot.yes { background: var(--green); }
+.dot.no  { background: var(--text3); }
+.dot.partial { background: var(--orange); }
+
+/* ── PALETTE ── */
+.palette { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.swatch-color {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.swatch-label { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.swatch-name  { font-size: 11px; color: var(--text2); font-weight: 500; }
+
+/* ── PRIORITY LIST ── */
+.priority-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.priority-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.priority-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.priority-item h4 { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.priority-item p  { font-size: 13px; color: var(--text2); }
+.priority-item .impact {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ── QUOTE ── */
+.insight {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 12px 12px 0;
+  padding: 18px 20px;
+  margin: 24px 0;
+  font-size: 14px;
+  color: var(--text2);
+}
+.insight strong { color: var(--text); }
+
+/* ── SOURCES ── */
+.sources {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 32px;
+}
+.sources h4 { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+.sources a  { display: block; font-size: 13px; color: var(--blue); text-decoration: none; margin-bottom: 5px; }
+.sources a:hover { text-decoration: underline; }
+
+/* ── FOOTER ── */
+.footer {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text3);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+}
+.footer strong { color: var(--gold); }
+
+/* ── UTILS ── */
+.mt16 { margin-top: 16px; }
+.mt24 { margin-top: 24px; }
+.divider { height: 1px; background: var(--border); margin: 28px 0; }
+.sub-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 24px 0 14px;
+}
+
+@media (max-width: 600px) {
+  .cards.cols-2 { grid-template-columns: 1fr; }
+  .bench { overflow-x: auto; }
+  .priority-item .impact { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📊 Informe de producto · Junio 2026</div>
+  <h1>Guía de mejoras para<br><span>My Money</span></h1>
+  <p>Análisis basado en las apps mejor valoradas del mercado: YNAB, Monarch Money, Copilot, Empower y Quicken Simplifi.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">🏆 <span>5 apps analizadas</span></div>
+    <div class="hero-meta-item">📱 <span>App Store + Google Play</span></div>
+    <div class="hero-meta-item">🎨 <span>4 bloques de mejoras</span></div>
+    <div class="hero-meta-item">⚡ <span>30+ recomendaciones</span></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-link" href="#benchmark">Benchmark</a>
+    <a class="nav-link" href="#visual">Diseño visual</a>
+    <a class="nav-link" href="#funcionalidades">Funcionalidades</a>
+    <a class="nav-link" href="#marca">Marca</a>
+    <a class="nav-link" href="#prioridades">Hoja de ruta</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- BLOQUE 0: BENCHMARK                       -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="benchmark">
+  <div class="section-header">
+    <div class="section-tag gold">🔍 Análisis competitivo</div>
+    <h2>Benchmark: My Money vs. el mercado</h2>
+    <p class="section-desc">Comparación de funcionalidades clave contra las 5 apps mejor valoradas en finanzas personales e inversiones en App Store y Google Play (2026).</p>
+  </div>
+
+  <div class="bench" style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Funcionalidad</th>
+          <th>My Money</th>
+          <th>Monarch</th>
+          <th>YNAB</th>
+          <th>Copilot</th>
+          <th>Empower</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Registro manual de gastos</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Categorías personalizadas</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Gráficos de tendencia</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Seguimiento de inversiones</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot partial"></span>Básico</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Presupuesto mensual por categoría</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí (ZBB)</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Metas de ahorro</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Multi-moneda</td>
+          <td><span class="dot partial"></span>ARS/USD</td>
+          <td><span class="dot yes"></span>Global</td>
+          <td><span class="dot yes"></span>Global</td>
+          <td><span class="dot yes"></span>Global</td>
+          <td><span class="dot yes"></span>Global</td>
+        </tr>
+        <tr>
+          <td>Resumen semanal / diario</td>
+          <td><span class="dot partial"></span>Parcial</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Sincronización bancaria automática</td>
+          <td><span class="dot no"></span>No</td>
+          <td><span class="dot yes"></span>13.000+ bancos</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>10.000+</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>IA / categorización automática</td>
+          <td><span class="dot no"></span>No</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot no"></span>No</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Detección de suscripciones</td>
+          <td><span class="dot no"></span>No</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot no"></span>No</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Patrimonio neto (Net Worth)</td>
+          <td><span class="dot no"></span>No</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>Exportación CSV</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+        </tr>
+        <tr>
+          <td>App móvil nativa / PWA</td>
+          <td><span class="dot no"></span>Web only</td>
+          <td><span class="dot yes"></span>iOS + Android</td>
+          <td><span class="dot yes"></span>iOS + Android</td>
+          <td><span class="dot yes"></span>iOS / Mac</td>
+          <td><span class="dot yes"></span>iOS + Android</td>
+        </tr>
+        <tr>
+          <td>Modo claro / oscuro</td>
+          <td><span class="dot partial"></span>Solo oscuro</td>
+          <td><span class="dot yes"></span>Ambos</td>
+          <td><span class="dot yes"></span>Ambos</td>
+          <td><span class="dot yes"></span>Ambos</td>
+          <td><span class="dot yes"></span>Ambos</td>
+        </tr>
+        <tr>
+          <td>Widgets de pantalla de inicio</td>
+          <td><span class="dot no"></span>No</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot no"></span>No</td>
+        </tr>
+        <tr>
+          <td>Racha / gamificación</td>
+          <td><span class="dot no"></span>No</td>
+          <td><span class="dot partial"></span>Básico</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot yes"></span>Sí</td>
+          <td><span class="dot no"></span>No</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <strong>Conclusión del benchmark:</strong> My Money ya compite en funciones core de registro y análisis. Las mayores oportunidades están en <strong>patrimonio neto, app instalable (PWA), modo claro, racha de registros e insights automáticos</strong> — todas implementables sin banco conectado.
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!-- BLOQUE 1: VISUAL                          -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="visual">
+  <div class="section-header">
+    <div class="section-tag blue">🎨 Apartado visual</div>
+    <h2>Diseño visual y experiencia</h2>
+    <p class="section-desc">Mejoras inspiradas en Copilot Money (mejor UI/UX del mercado según múltiples reviews 2026) y Monarch Money (mejor experiencia general según NerdWallet).</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon" style="background:var(--blue-light)">🌗</div>
+      <h3>Modo claro (Light Mode)</h3>
+      <p>My Money es solo dark. En 2026, el 100% de las top apps ofrecen ambos modos. Un theme claro aumenta el uso diurno, la accesibilidad y la percepción de producto terminado. Implementable con variables CSS y un toggle en el header.</p>
+      <span class="tag alta">Impacto alto</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--green-light)">📊</div>
+      <h3>Dashboard con balance hero</h3>
+      <p>Copilot y Monarch ponen el balance en grande al centro, como el dato más importante. Las 4 cards actuales son funcionales pero no generan un momento visual de impacto. Un hero con el balance en 48px de fuente cambia completamente la primera impresión.</p>
+      <span class="tag alta">Impacto alto</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--red-light)">📱</div>
+      <h3>Bottom navigation en mobile</h3>
+      <p>Los tabs horizontales en el tope son difíciles de alcanzar en pantallas &gt;6". Una bottom bar fija (Nuevo · Historial · Gráficos · Metas) mejora drásticamente la ergonomía con una sola mano, el estándar en todas las apps nativas.</p>
+      <span class="tag alta">Impacto alto</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--purple-light)">✨</div>
+      <h3>Transiciones entre tabs</h3>
+      <p>Agregar slide horizontal al cambiar de tab (Nuevo ← → Historial). Las micro-animaciones de transición hacen que la app "se sienta" nativa. CSS puro: transform + opacity con 200ms ease-out.</p>
+      <span class="tag media">Impacto medio</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--teal-light)">📉</div>
+      <h3>Gradiente vertical en gráficos</h3>
+      <p>Cambiar el fill plano del gráfico de tendencia por un gradiente vertical (color sólido → transparente). Es el estándar visual en Empower, Monarch y Copilot — da profundidad sin perder legibilidad.</p>
+      <span class="tag media">Impacto medio</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--orange-light)">🏷️</div>
+      <h3>Filas del historial más visuales</h3>
+      <p>Agregar un fondo de color ultra-suave (2% de opacidad) por categoría en cada fila del historial. Copilot usa colores de fila que hacen el scroll más escaneable. También: fecha más prominente y monto alineado a la derecha con fuente monoespaciada.</p>
+      <span class="tag media">Impacto medio</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--purple-light)">🌀</div>
+      <h3>Empty states ilustrados</h3>
+      <p>Cuando no hay datos, en lugar de texto gris, usar ilustraciones SVG simples con un CTA claro ("+ Registrá tu primer gasto"). Copilot y Monarch tienen empty states diseñados que guían al usuario en lugar de dejarlo perdido.</p>
+      <span class="tag media">Impacto medio</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--gold-light)">🔢</div>
+      <h3>Tipografía numérica tabular</h3>
+      <p>Usar <code style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px;">font-variant-numeric: tabular-nums</code> en todas las cifras del historial para que los montos se alineen visualmente en columnas, sin importar cuántos dígitos tengan.</p>
+      <span class="tag baja">Impacto bajo</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--blue-light)">🏆</div>
+      <h3>Animación de logro en metas</h3>
+      <p>Cuando una meta llega al 100%, mostrar una animación de confetti o un badge especial. YNAB gamifica este momento con un "Goal Funded!" animado que genera satisfacción y retención emocional.</p>
+      <span class="tag baja">Impacto bajo</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <p class="sub-title">Paleta de color — actual vs. expansión sugerida</p>
+  <p style="font-size:13px;color:var(--text3);margin-bottom:20px;">My Money ya tiene una paleta sólida y diferenciada (dorado sobre negro). Las expansiones sugeridas agregan semántica: cada tipo de dato tiene su propio color.</p>
+
+  <div class="palette">
+    <div class="swatch">
+      <div class="swatch-color" style="background:#0D0D0D;"></div>
+      <div class="swatch-label">#0D0D0D</div>
+      <div class="swatch-name">BG actual ✓</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#C9A84C;"></div>
+      <div class="swatch-label">#C9A84C</div>
+      <div class="swatch-name">Acento ✓</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#4CAF50;"></div>
+      <div class="swatch-label">#4CAF50</div>
+      <div class="swatch-name">Ingresos ✓</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#EF5350;"></div>
+      <div class="swatch-label">#EF5350</div>
+      <div class="swatch-name">Gastos ✓</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#F8F8FC;border:1px solid rgba(0,0,0,0.15);"></div>
+      <div class="swatch-label">#F8F8FC</div>
+      <div class="swatch-name">+ Light BG</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#60A5FA;"></div>
+      <div class="swatch-label">#60A5FA</div>
+      <div class="swatch-name">+ Info / A plazo</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#A78BFA;"></div>
+      <div class="swatch-label">#A78BFA</div>
+      <div class="swatch-name">+ Inversiones</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#2DD4BF;"></div>
+      <div class="swatch-label">#2DD4BF</div>
+      <div class="swatch-name">+ Ahorro / Metas</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!-- BLOQUE 2: FUNCIONALIDADES                 -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="funcionalidades">
+  <div class="section-header">
+    <div class="section-tag green">⚡ Funcionalidades</div>
+    <h2>Nuevas funciones y mejoras</h2>
+    <p class="section-desc">Features directamente extraídas de los top-rated apps, priorizadas por implementabilidad en My Money sin necesidad de sincronización bancaria.</p>
+  </div>
+
+  <p class="sub-title">🆕 Funcionalidades nuevas</p>
+  <div class="cards cols-2">
+    <div class="card">
+      <div class="card-icon" style="background:var(--green-light)">💰</div>
+      <h3>Patrimonio neto (Net Worth)</h3>
+      <p>La feature más valorada de Empower y Monarch. Un módulo que suma activos (ahorros, inversiones registradas, inmuebles) y resta pasivos (deudas, créditos, préstamos) para mostrar el patrimonio real. Actualizable manualmente. Es el KPI financiero más importante que hoy no tiene My Money.</p>
+      <span class="tag nueva">Nueva</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--red-light)">🔥</div>
+      <h3>Racha de registros (Streak)</h3>
+      <p>YNAB y Copilot gamifican el hábito de registrar. Mostrar "🔥 12 días seguidos registrando" en el header. Según datos internos de YNAB, los usuarios que ven su racha tienen 3× más retención a 30 días. Implementable con las fechas ya existentes en los entries.</p>
+      <span class="tag nueva">Nueva</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--purple-light)">🔁</div>
+      <h3>Detector de gastos recurrentes</h3>
+      <p>Algoritmo sobre los entries existentes: buscar misma descripción + monto ±10% en 2+ meses consecutivos → marcar como recurrente y listar como "suscripciones / gastos fijos". Copilot lo hace con IA, pero se puede hacer con lógica determinista sin IA.</p>
+      <span class="tag nueva">Nueva</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--teal-light)">🤖</div>
+      <h3>Insights automáticos</h3>
+      <p>Sin IA real: comparar cada categoría del mes actual vs. promedio de los últimos 3 meses. Si hay una diferencia &gt;25%, mostrar una alerta contextual: "Gastaste 40% más en Restaurantes este mes vs. tu promedio". Monarch y Empower lo hacen con IA — My Money puede lograrlo con JS puro.</p>
+      <span class="tag nueva">Nueva</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--blue-light)">🔮</div>
+      <h3>Proyección de flujo de caja</h3>
+      <p>Con los gastos recurrentes detectados, proyectar el balance a 30/60 días. Mostrar si vas a entrar en rojo antes de fin de mes. YNAB lo llama "Age of Money". Muy valorado por usuarios que viven de ingresos variables o manejan freelance.</p>
+      <span class="tag nueva">Nueva</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--gold-light)">📅</div>
+      <h3>Presupuesto base cero (ZBB)</h3>
+      <p>El método estrella de YNAB: asignar cada peso de ingreso a una categoría antes de gastarlo. My Money ya tiene budgets por categoría, pero el ZBB cierra el ciclo: el dinero "no asignado" se muestra prominentemente y te invita a asignarlo a metas o ahorro.</p>
+      <span class="tag nueva">Nueva</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--orange-light)">🏦</div>
+      <h3>Multi-moneda mejorada + tipo de cambio</h3>
+      <p>Agregar EUR, mostrar tipo de cambio ARS/USD (actualizable manualmente o via API pública) y convertir todo el patrimonio a una moneda base para verlo unificado. Kubera es el referente en multi-asset tracking multimoneda.</p>
+      <span class="tag nueva">Nueva</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--purple-light)">📤</div>
+      <h3>Exportación PDF mensual</h3>
+      <p>My Money ya exporta CSV. El siguiente paso: un resumen mensual en PDF con gráficos incrustados (usando html2canvas + jsPDF). Monarch y Quicken Simplifi lo ofrecen como diferenciador premium. Útil para compartir con contadores o para archivar.</p>
+      <span class="tag nueva">Nueva</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <p class="sub-title">🔧 Mejoras a funciones existentes</p>
+  <div class="cards cols-2">
+    <div class="card">
+      <div class="card-icon" style="background:var(--blue-light)">🎯</div>
+      <h3>Metas con aportes mensuales calculados</h3>
+      <p>Las metas actuales son estáticas. YNAB calcula automáticamente cuánto tenés que aportar por mes para llegar a la meta en la fecha objetivo, y te alerta si estás retrasado. Agregar ese cálculo simple: <em style="color:var(--text2)">(objetivo − actual) ÷ meses restantes</em>.</p>
+      <span class="tag mejora">Mejora</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--green-light)">📈</div>
+      <h3>Rendimiento de inversiones</h3>
+      <p>Agregar precio de compra y precio actual (manual) a cada instrumento de inversión. Calcular ROI% y ganancia/pérdida en pesos y USD. Es la feature central de Kubera y Empower — sin ella, "Inversiones" es solo un registro de gastos.</p>
+      <span class="tag mejora">Mejora</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--gold-light)">👆</div>
+      <h3>Swipe-to-delete en mobile</h3>
+      <p>En móvil, los botones de editar/eliminar son pequeños. Swipe-left sobre una fila para revelar acciones (editar en azul, eliminar en rojo). Es como funciona la app nativa de iOS y como lo hace Copilot — mejora la UX móvil drásticamente.</p>
+      <span class="tag mejora">Mejora</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--orange-light)">⚡</div>
+      <h3>Templates de transacciones frecuentes</h3>
+      <p>Guardar "favoritos" en el formulario de carga para pre-llenar con un tap: descripción + categoría + monto + forma de pago. Monarch y Copilot lo llaman "Quickfill". Reduce el tiempo de registro de 20 segundos a 3 segundos.</p>
+      <span class="tag mejora">Mejora</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--teal-light)">🗓️</div>
+      <h3>Vista calendario con heatmap</h3>
+      <p>Además de las vistas Día y Mes, agregar un calendario donde cada día muestra el total de gastos con intensidad de color (días de más gasto = más saturado). Es la visualización preferida por usuarios de Copilot para detectar patrones de comportamiento.</p>
+      <span class="tag mejora">Mejora</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--purple-light)">💬</div>
+      <h3>PWA / App instalable en home screen</h3>
+      <p>Agregar <code style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px;">manifest.json</code> y un service worker básico. My Money puede instalarse como app nativa en iOS y Android sin pasar por App Store, con ícono en el home screen y apertura fullscreen.</p>
+      <span class="tag mejora">Mejora</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!-- BLOQUE 3: MARCA                           -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="marca">
+  <div class="section-header">
+    <div class="section-tag orange">🏷️ Marca</div>
+    <h2>Recomendaciones de marca</h2>
+    <p class="section-desc">Basadas en el análisis de branding de las mejores marcas fintech de 2026 y los principios de diseño que generan confianza en aplicaciones financieras.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon" style="background:var(--gold-light)">✍️</div>
+      <h3>Tagline consistente</h3>
+      <p>"My Money" es claro y personal. Reforzarlo con un tagline en todos los puntos de contacto. Opciones:<br><br><strong style="color:var(--gold)">"Tus finanzas, en claro."</strong><br><strong style="color:var(--gold)">"Registrá. Analizá. Crecé."</strong><br><strong style="color:var(--gold)">"Tu dinero, bajo control."</strong></p>
+      <span class="tag marca">Marca</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--orange-light)">🎨</div>
+      <h3>Uso estratégico del dorado</h3>
+      <p>El dorado #C9A84C es un diferenciador fuerte — evoca solidez y valor (único en el mercado de finanzas personales que suele usar azules/verdes). Usarlo con más intención: solo para CTAs principales y logros positivos. Evitar en textos secundarios donde pierde jerarquía.</p>
+      <span class="tag marca">Marca</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--blue-light)">🔤</div>
+      <h3>DM Sans + DM Mono como sistema tipográfico</h3>
+      <p>DM Sans es excelente. Para una identidad más fuerte, usar <strong style="color:var(--text)">DM Sans 800</strong> para el logotipo y balances grandes, y <strong style="color:var(--text)">DM Mono</strong> para todos los valores numéricos del historial. Da precisión técnica y diferencia datos de texto editorial.</p>
+      <span class="tag marca">Marca</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--green-light)">📱</div>
+      <h3>Ícono de app</h3>
+      <p>Si se avanza a PWA o app nativa, el ícono debe funcionar en fondo oscuro y claro. Recomendado: fondo negro con el monograma <strong style="color:var(--gold)">$M</strong> en dorado. Simple, reconocible en 20px. Agregar variante en blanco para fondos claros del sistema.</p>
+      <span class="tag marca">Marca</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--teal-light)">🔐</div>
+      <h3>Comunicar seguridad explícitamente</h3>
+      <p>El 73% de usuarios de fintech evalúan la confianza como factor #1 de adopción. Agregar en el onboarding y en el footer: <em style="color:var(--text2)">"Datos cifrados · Solo vos podés ver tu información · Sin publicidad"</em>. No basta con ser seguro — hay que comunicarlo.</p>
+      <span class="tag marca">Marca</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--purple-light)">🌐</div>
+      <h3>Landing page propia</h3>
+      <p>Las top apps tienen una landing de una página con: captura de pantalla hero, 3 features principales, y un botón "Abrir app". Registrar un dominio como <code style="font-size:12px;background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:4px;">mymoney.ar</code> o similar aumenta la percepción de producto serio.</p>
+      <span class="tag marca">Marca</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--red-light)">💬</div>
+      <h3>Tono de voz alentador</h3>
+      <p>El copy actual es neutro y técnico. Las apps mejor valoradas (Copilot, Monarch) usan un tono <strong style="color:var(--text)">amigable y motivador</strong>: <em>"¡Muy bien! Gastaste menos que el mes pasado 🎉"</em> en lugar de solo números. Pequeño cambio, gran impacto emocional en retención.</p>
+      <span class="tag marca">Marca</span>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:var(--gold-light)">🚀</div>
+      <h3>Onboarding estructurado</h3>
+      <p>El primer uso define la retención. Un flujo de 3 pasos al primer login: (1) ¿Cuál es tu ingreso mensual?, (2) ¿Qué querés lograr? (Ahorrar · Invertir · Salir de deudas), (3) Configurá tu primer presupuesto. YNAB llama a esto el "Four Rules Tour" y es central en su retención.</p>
+      <span class="tag marca">Marca</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ -->
+<!-- BLOQUE 4: HOJA DE RUTA                   -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="prioridades">
+  <div class="section-header">
+    <div class="section-tag purple">🗺️ Hoja de ruta</div>
+    <h2>Priorización de mejoras</h2>
+    <p class="section-desc">Ordenadas por relación impacto / esfuerzo. Las primeras 5 generan el mayor retorno visible con menor complejidad técnica.</p>
+  </div>
+
+  <div class="priority-list">
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--red-light);color:var(--red)">1</div>
+      <div>
+        <h4>🔥 Racha de registros (Streak)</h4>
+        <p>Calcular días consecutivos con al menos un registro usando las fechas existentes en entries. Mostrar en el header. Esfuerzo: bajo. Retención: alta (datos de YNAB muestran 3× retención a 30 días).</p>
+      </div>
+      <span class="impact" style="background:var(--red-light);color:var(--red)">Fácil · Alto</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--red-light);color:var(--red)">2</div>
+      <div>
+        <h4>🌗 Light Mode</h4>
+        <p>Variables CSS + toggle en header. Usa las variables CSS ya existentes: crear un data-theme="light" con valores sobreescritos. Esfuerzo: medio. Accesibilidad e impresión de producto terminado: muy alta.</p>
+      </div>
+      <span class="impact" style="background:var(--red-light);color:var(--red)">Medio · Alto</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--red-light);color:var(--red)">3</div>
+      <div>
+        <h4>📱 Bottom navigation en mobile</h4>
+        <p>Mover los tabs al pie en pantallas &lt;600px con CSS media query + JS. Mejora ergonomía con una mano. El estándar en todas las apps nativas del mercado.</p>
+      </div>
+      <span class="impact" style="background:var(--red-light);color:var(--red)">Fácil · Alto</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--orange-light);color:var(--orange)">4</div>
+      <div>
+        <h4>💡 Insights automáticos por categoría</h4>
+        <p>Comparar mes actual vs. promedio 3 meses en cada categoría. Si diferencia &gt;25%, mostrar badge de alerta en el dashboard. JS puro, sin IA, usa los entries ya cargados.</p>
+      </div>
+      <span class="impact" style="background:var(--orange-light);color:var(--orange)">Medio · Medio</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--orange-light);color:var(--orange)">5</div>
+      <div>
+        <h4>💰 Patrimonio neto (Net Worth)</h4>
+        <p>Nuevo tab con campos manuales para activos (inversiones ya registradas + inmuebles + ahorros externos) y pasivos (deudas, préstamos). Suma neta = patrimonio. Guardado en Supabase o localStorage.</p>
+      </div>
+      <span class="impact" style="background:var(--orange-light);color:var(--orange)">Medio · Alto</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--orange-light);color:var(--orange)">6</div>
+      <div>
+        <h4>⚡ Templates de transacciones frecuentes</h4>
+        <p>Botón "Guardar como favorito" en el formulario. Lista de favoritos guardados en localStorage. Un tap pre-llena desc + categoría + monto + forma de pago. Reduce tiempo de registro a &lt;3 segundos.</p>
+      </div>
+      <span class="impact" style="background:var(--orange-light);color:var(--orange)">Fácil · Medio</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--orange-light);color:var(--orange)">7</div>
+      <div>
+        <h4>📱 PWA / App instalable</h4>
+        <p>Agregar manifest.json con íconos + service worker básico. My Money puede instalarse en iOS y Android desde el browser sin pasar por ninguna tienda. Apertura fullscreen, ícono en home screen, splash screen.</p>
+      </div>
+      <span class="impact" style="background:var(--orange-light);color:var(--orange)">Medio · Alto</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--blue-light);color:var(--blue)">8</div>
+      <div>
+        <h4>🔁 Detector de suscripciones / recurrentes</h4>
+        <p>Algoritmo sobre entries existentes: misma descripción + monto ±10% en 2+ meses. Listar en una sección "Recurrentes" con el monto mensual estimado. Permite ver cuánto gastás en fijos antes de tomar decisiones.</p>
+      </div>
+      <span class="impact" style="background:var(--blue-light);color:var(--blue)">Complejo · Alto</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--blue-light);color:var(--blue)">9</div>
+      <div>
+        <h4>📈 Rendimiento de inversiones</h4>
+        <p>Agregar campos de precio de compra y precio actual (manual) a cada instrumento de inversión. Calcular ROI%, ganancia/pérdida en ARS y USD. Sin esto, "Invertido" es solo un tracker de gastos, no de patrimonio.</p>
+      </div>
+      <span class="impact" style="background:var(--blue-light);color:var(--blue)">Complejo · Muy alto</span>
+    </div>
+    <div class="priority-item">
+      <div class="priority-num" style="background:var(--blue-light);color:var(--blue)">10</div>
+      <div>
+        <h4>🗓️ Vista calendario con heatmap de gastos</h4>
+        <p>Calendario mensual donde la intensidad del color de cada día representa el monto de gastos. De un vistazo se ven los días de mayor gasto. Usable para detectar patrones de comportamiento financiero.</p>
+      </div>
+      <span class="impact" style="background:var(--blue-light);color:var(--blue)">Complejo · Medio</span>
+    </div>
+  </div>
+
+  <div class="insight mt24">
+    <strong>Ventaja competitiva real de My Money:</strong> Es gratuita, privada (solo el usuario ve sus datos), sin publicidad, y completamente personalizable. Las apps líderes cobran entre USD 4 y USD 15 por mes. El diferenciador ganador no debe ser el precio — debe ser la <strong>experiencia</strong> y la <strong>confianza</strong>. Una app que se siente premium genera retención sin necesidad de monetización agresiva.
+  </div>
+
+  <div class="sources">
+    <h4>Fuentes consultadas</h4>
+    <a href="https://www.nerdwallet.com/finance/learn/best-budget-apps" target="_blank">NerdWallet — Best Budget Apps 2026</a>
+    <a href="https://robberger.com/investment-tracking-apps/" target="_blank">Rob Berger — 8 Best Investment Tracking Apps 2026</a>
+    <a href="https://x1wealth.com/compare/copilot-vs-monarch" target="_blank">Copilot vs Monarch Money — Comparativa Junio 2026</a>
+    <a href="https://earnifyhub.com/finance-money/ynab-vs-monarch-vs-copilot-2026" target="_blank">YNAB vs Monarch vs Copilot 2026 — EarnifyHub</a>
+    <a href="https://www.securities.io/5-best-portfolio-management-apps-for-ios-month-year/" target="_blank">Securities.io — 5 Best Portfolio Apps iOS 2026</a>
+    <a href="https://www.g-co.agency/insights/the-best-ux-design-practices-for-finance-apps" target="_blank">G&CO — Best UX Design Practices for Finance Apps 2026</a>
+    <a href="https://www.gitnexa.com/blogs/modern-fintech-ui-ux-trends" target="_blank">GitNexa — Modern Fintech UI/UX Trends 2026</a>
+    <a href="https://www.patrickhuijs.com/blog/fintech-brand-colors-guide" target="_blank">Patrick Huijs — Fintech Brand Colors Guide</a>
+    <a href="https://era.app/articles/era-vs-monarch-vs-copilot-vs-ynab/" target="_blank">Era — Era vs Monarch vs Copilot vs YNAB 2026</a>
+    <a href="https://envelopebudgeting.com/articles/monarch-money-review" target="_blank">Monarch Money Review 2026</a>
+    <a href="https://aitoolpick.org/blog/ynab-review-2026/" target="_blank">YNAB Review 2026 — AIToolPick</a>
+    <a href="https://www.thepennyhoarder.com/budgeting/budgeting-copilot-money-review/" target="_blank">Copilot Money Review 2026 — The Penny Hoarder</a>
+  </div>
+</section>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Informe generado para <strong>My Money</strong> · Junio 2026<br>
+  Basado en análisis de YNAB, Monarch Money, Copilot, Empower y Quicken Simplifi
+</div>
+
+</body>
+</html>

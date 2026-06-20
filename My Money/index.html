@@ -766,8 +766,11 @@ textarea { resize: vertical; min-height: 56px; }
   .month-select { font-size: 12px; padding: 4px 22px 4px 7px; }
   .streak-badge { font-size: 11px !important; padding: 2px 7px !important; }
 
-  /* Métricas secundarias: 2 columnas en mobile */
-  .metrics-secondary { grid-template-columns: 1fr 1fr; }
+  /* Métricas: Ingresos+Invertido en col izq, Gastos+Aplazo en col der */
+  .metrics-secondary { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  .metric-sec:nth-child(1) { grid-column: 1; grid-row: 1; } /* Ingresos */
+  .metric-sec:nth-child(2) { grid-column: 2; grid-row: 1 / 3; } /* Gastos+Aplazo ocupa 2 filas */
+  .metric-sec:nth-child(3) { grid-column: 1; grid-row: 2; } /* Invertido */
   .metric-sec { padding: 10px; }
   .metric-sec-val { font-size: 13px; }
   .metric-sec-label { font-size: 9px; }

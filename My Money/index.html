@@ -1801,7 +1801,7 @@ function updateMetrics() {
   const denominator = totalBudget > 0 ? totalBudget : totalIngresos;
   if (denominator > 0) {
     barWrap.style.display = '';
-    const pctNum = Math.round((totalGastos + totalGastoPlazo) / denominator * 100);
+    const pctNum = Math.round((totalGastos + totalGastoPlazo + totalInvertido) / denominator * 100);
     fill.style.width      = Math.min(pctNum, 100) + '%';
     fill.style.background = pctNum >= 100 ? 'var(--red)' : pctNum >= 80 ? '#E8A020' : 'var(--green)';
     pctEl.textContent     = pctNum + '%';

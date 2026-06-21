@@ -2129,7 +2129,22 @@ function renderCatProgress() {
   const mes = monthEntries();
 
   if (chartType === 'inversion') {
-    renderInvProgress(mes);
+    const invEntries = mes.filter(e => e.type === 'inversion');
+    if (!invEntries.length) { el.innerHTML = '<div class="empty">Sin inversiones este mes</div>'; return; }
+    const total = invEntries.reduce((s,e) => s + e.amount, 0);
+    const bySub = {};
+    invEntries.forEach(e => { bySub[e.subcategory || 'Otros'] = (bySub[e.subcategory || 'Otros'] || 0) + e.amount; });
+    el.innerHTML = Object.entries(bySub).sort((a,b) => b[1]-a[1]).map(([sub, amount]) => {
+      const color = INV_COLORS[sub] || '#8E8E93';
+      const pct   = Math.round((amount / total) * 100);
+      return `<div class="cat-progress-item" onclick="goToCat('Inversiones','inversion','${sub}')" title="Ver en historial">
+        <div class="cat-progress-header">
+          <span class="cat-progress-name" style="color:${color}">${sub}</span>
+          <span class="cat-progress-info">${fmt(amount)} · ${pct}%</span>
+        </div>
+        <div class="cat-progress-track"><div class="cat-progress-fill" style="width:${pct}%;background:${color};"></div></div>
+      </div>`;
+    }).join('');
     return;
   }
 

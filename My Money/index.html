@@ -1839,8 +1839,8 @@ function setDelta(id, cur, pre, invertColors) {
 function formatAmountInput(el) {
   const pos    = el.selectionStart;
   const oldLen = el.value.length;
-  // Quitar $, convertir puntos de miles y punto decimal a coma, luego limpiar
-  let raw = el.value.replace(/\$/g, '').replace(/\./g, ',').replace(/[^0-9,]/g, '');
+  // Quitar $ y puntos de miles (siempre separadores de miles, nunca decimales en ARS), limpiar
+  let raw = el.value.replace(/\$/g, '').replace(/\./g, '').replace(/[^0-9,]/g, '');
   // Solo una coma decimal (la primera)
   const ci = raw.indexOf(',');
   if (ci !== -1) raw = raw.slice(0, ci + 1) + raw.slice(ci + 1).replace(/,/g, '');

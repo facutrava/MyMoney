@@ -317,6 +317,7 @@ textarea { resize: vertical; min-height: 56px; }
 }
 .freq-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+
 /* Budget modal */
 .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem; }
 .modal-box { background:var(--surface);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,0.5); }
@@ -2869,6 +2870,7 @@ function renderInvProgress(mes) {
   }).join('');
 }
 
+/* Payment chips */
 async function addEntry() {
   const desc          = document.getElementById('f-desc').value.trim();
   const amount        = parseAmountInput(document.getElementById('f-amount'));

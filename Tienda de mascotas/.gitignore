@@ -1,0 +1,8 @@
+.next/
+node_modules/
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+*.mp4
+*.mov
+Videos/
+public/videos/
